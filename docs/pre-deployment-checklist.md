@@ -47,7 +47,7 @@ We use a dedicated service principal to deploy infrastructure **and** manage stu
 
 The service principal needs:
 - **Contributor** on the subscription — for creating and managing Azure resources (VMs, VNets, Bastion, etc.)
-- **User Administrator** (or **User Access Administrator**) on Entra ID — for creating student accounts and assigning RBAC roles
+- **User Access Administrator** on the subscription — for creating student accounts and assigning RBAC roles
 
 ### Option A — CLI (Recommended, ~2 minutes)
 
@@ -63,7 +63,7 @@ az ad sp create-for-rbac \
   --sdk-auth
 ```
 
-After creating the SP, grant **User Access Administrator** on the subscription (needed for student account RBAC):
+After creating the SP, grant **User Access Administrator** on the subscription:
 
 ```bash
 az role assignment create \
@@ -71,13 +71,6 @@ az role assignment create \
   --role "User Access Administrator" \
   --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
 ```
-
-And grant Entra ID directory permissions for student account creation:
-
-1. Azure Portal → **Entra ID** → **App registrations** → `sp-cirtlab-deploy`
-2. **API permissions** → **Add a permission** → **Microsoft Graph**
-3. Add **Application permissions**: `User.ReadWrite.All`, `Directory.ReadWrite.All`
-4. Click **Grant admin consent**
 
 Copy the entire JSON output — it looks like this:
 ```json
@@ -210,7 +203,6 @@ Once complete, please confirm:
 - [ ] Service principal created and credentials collected
 - [ ] SP has **Contributor** role on subscription
 - [ ] SP has **User Access Administrator** role on subscription
-- [ ] SP has **Entra ID** permissions for student account creation (Graph API consent granted)
 - [ ] Subscription ID and Tenant ID noted
 - [ ] VM quota verified (10 vCPUs available in chosen region)
 - [ ] Existing infra documented (or "none — clean subscription")
