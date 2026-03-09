@@ -221,7 +221,7 @@ Virtual machines are deployed from pre-built golden images. Before deploying, co
 
 ### 8a — Note the Community Gallery Reference
 
-CIRT APAC publishes images to an Azure Community Gallery. You will need this reference for your `terraform.tfvars`:
+OD@CIRT.APAC publishes images to an Azure Community Gallery. You will need this reference for your `terraform.tfvars`:
 
 | Variable | Where to find it |
 |----------|-----------------|
