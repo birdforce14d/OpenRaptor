@@ -6,11 +6,12 @@
 # Sets up all scenario prerequisites for Module 01 (SharePoint Webshell).
 #
 # What this script does:
-#   1. Creates j.chen AD account (compromised Finance analyst)
-#   2. Grants j.chen appropriate SharePoint access
-#   3. Deploys attack toolkit to Kali at /opt/raptor/module-01/
-#   4. Downloads webshell payload from public repo to Kali
-#   5. Runs lab_01_check.ps1 to verify everything is ready
+#   1. Creates cirtstudent AD account (student login)
+#   2. Creates j.chen AD account (compromised Finance analyst — scenario only)
+#   3. Grants j.chen appropriate SharePoint access
+#   4. Deploys attack toolkit to Kali at /opt/raptor/module-01/
+#   5. Downloads webshell payload from public repo to Kali
+#   6. Runs lab_01_check.ps1 to verify everything is ready
 # =============================================================================
 
 param(
@@ -27,11 +28,30 @@ Write-Host "║  Run as: Domain Admin on DC01                ║" -ForegroundCol
 Write-Host "╚══════════════════════════════════════════════╝" -ForegroundColor Yellow
 Write-Host ""
 
-# --- Step 1: Create j.chen AD account ---
+# --- Step 1: Create AD accounts ---
 Write-Host "[1/4] Setting up AD accounts..." -ForegroundColor Yellow
 
 $password = ConvertTo-SecureString "<YOUR_STUDENT_PASSWORD>" -AsPlainText -Force
 
+# Create cirtstudent — the actual student login account
+if (-not (Get-ADUser -Filter {SamAccountName -eq "cirtstudent"} -ErrorAction SilentlyContinue)) {
+    New-ADUser -Name "CIRT Student" `
+        -SamAccountName "cirtstudent" `
+        -UserPrincipalName "cirtstudent@norca.click" `
+        -AccountPassword $password `
+        -Enabled $true `
+        -PasswordNeverExpires $true `
+        -Path "CN=Users,DC=norca,DC=click" `
+        -Description "Student login account — lab exercises"
+
+    Write-Host "  [OK] Created cirtstudent (CIRT Student)" -ForegroundColor Green
+} else {
+    Set-ADAccountPassword -Identity "cirtstudent" -Reset -NewPassword $password
+    Enable-ADAccount -Identity "cirtstudent"
+    Write-Host "  [SKIP] cirtstudent already exists — password reset, account enabled" -ForegroundColor Yellow
+}
+
+# Create j.chen — compromised account for scenario (NOT for student login)
 if (-not (Get-ADUser -Filter {SamAccountName -eq "j.chen"} -ErrorAction SilentlyContinue)) {
     New-ADUser -Name "Jenny Chen" `
         -GivenName "Jenny" `
