@@ -74,3 +74,7 @@ Be respectful and constructive. We are all here to learn and improve detection c
 ## Questions?
 
 Open a [GitHub issue](https://github.com/birdforce14d/OpenRaptor/issues) for questions, ideas, or discussion.
+
+---
+
+_OpenRaptor is maintained by CIRT APAC._
