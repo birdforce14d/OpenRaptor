@@ -226,26 +226,31 @@ If any check fails, see **Troubleshooting** below.
 
 ---
 
-## Step 6.5 — Lab Module Setup (Kali Toolkit Staging)
+## Step 6.5 — Lab Module Setup
 
-After deployment, stage the attack toolkit for the active module onto Kali01. This runs from the orchestrator VM and is idempotent — safe to re-run.
+After deployment, run two setup steps for Module 01:
 
+**1. On DC01 (via Bastion) — create AD accounts and configure SP01:**
+```powershell
+.\scenarios\module-01-webshell\admin\lab_01_setup.ps1
+```
+
+**2. On Kali01 (via Bastion SSH) — stage the attack toolkit:**
 ```bash
-# Module 01 — SharePoint Webshell
-bash scripts/lab_01_setup.sh
+sudo bash /opt/raptor/module-01/kali_01_setup.sh
+# If not yet downloaded:
+curl -sL https://raw.githubusercontent.com/birdforce14d/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh | sudo bash
 ```
 
-Expected output:
+Expected output from `lab_01_setup.ps1`:
 ```
-[OK] DC01 reachable
-[OK] SP01 reachable
-[OK] j.chen account created (or already exists)
-[OK] Kali01 toolkit staged at /opt/raptor/lab-01/
-[OK] SP01 in clean state (no webshell present)
+[OK] j.chen account created
+[OK] cirtstudent account created
+[OK] SP01 accessible
 --- Lab 01 setup: READY ---
 ```
 
-> Run this once after initial deployment and again after any full lab rebuild. Not required after SP01-only resets (reset-lab.sh handles SP01 state automatically).
+> Run both steps once after initial deployment and again after any full lab rebuild.
 
 ---
 
@@ -475,11 +480,12 @@ Use this plan if a VM crashes and cannot be recovered by a normal restart.
 
 SP01 is designed to be rebuilt. This is the standard student reset flow.
 
-```bash
-./scripts/reset-lab.sh
+```powershell
+# Run on DC01 as Domain Admin
+.\scenarios\module-01-webshell\admin\lab_01_reset.ps1
 ```
 
-If Terraform fails, manual rebuild:
+If Terraform is needed for a full rebuild:
 ```bash
 cd infra
 terraform destroy -target module.sp01 -auto-approve
@@ -587,7 +593,7 @@ Full rebuild: ~45–60 minutes.
 - [ ] SP01 — domain joined, HTTP 200, all SP services running
 - [ ] Kali (if rebuilt) — tools present, network connectivity
 - [ ] LAW receiving heartbeats from all VMs
-- [ ] Run `./scripts/reset-lab.sh` smoke test passes
+- [ ] Run `lab_01_check.ps1` smoke test passes
 
 ---
 
