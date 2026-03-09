@@ -140,7 +140,7 @@ VMs are deployed from pre-built golden images in the Azure Compute Gallery. This
 | `sp01-module01` | SP01 | SharePoint — **webShelled** — pre-compromised. Reserved for future modules |
 | `kali01-base` | Kali | Kali Linux with full attack toolkit pre-installed at `/opt/raptor/` |
 
-> **Source:** Images are published to the Azure Community Gallery. See your deployment `terraform.tfvars` for the gallery reference.
+> **Source:** Images are published to the Azure Community Gallery by OD@CIRT.APAC. The gallery name is provided directly to authorised deployers — contact us to request access.
 
 ### Deploy from Images
 
@@ -164,7 +164,7 @@ In `infra/base/terraform.tfvars`, set the gallery reference:
 
 ```hcl
 # Community Gallery — source of golden images
-community_gallery_name = "<COMMUNITY_GALLERY_NAME>"   # Published in README once images are live
+community_gallery_name = "<COMMUNITY_GALLERY_NAME>"   # Provided by OD@CIRT.APAC — contact us to request access
 image_location         = "australiaeast"               # must match gallery region
 ```
 
