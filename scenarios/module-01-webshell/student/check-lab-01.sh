@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # Module 01 — Lab Environment Preflight Check
-# OpenRaptor — OpenRaptor Cyber Range
+# OpenRaptor Cyber Range — CIRT APAC
 #
 # Run this BEFORE starting the lab to verify everything is ready.
 # Execute from Kali: /opt/raptor/module-01/preflight.sh
