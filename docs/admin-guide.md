@@ -289,7 +289,7 @@ Add-Computer -DomainName "{{DOMAIN}}" -Credential $cred -Force -Restart
 
 ## Lab Reset — Between Students
 
-Reset scripts are run from **DC01** (not the orchestrator VM). Each module has its own reset script.
+Reset scripts are run from **DC01**. Each module has its own reset script.
 
 ### Module 01 — SharePoint Webshell
 
