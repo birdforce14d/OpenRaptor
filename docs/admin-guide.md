@@ -220,8 +220,8 @@ If any check fails, see **Troubleshooting** below.
 ```bash
 # Create a student user
 az ad user create \
-  --display-name "Student 01" \
-  --user-principal-name "student01@{{DOMAIN}}" \
+  --display-name "CirtStudent" \
+  --user-principal-name "cirtstudent@norca.click" \
   --password "<YOUR_STUDENT_PASSWORD>" \
   --force-change-password-next-sign-in false
 ```
@@ -233,7 +233,7 @@ az ad user create \
 
 ```bash
 az role assignment create \
-  --assignee "student01@{{DOMAIN}}" \
+  --assignee "cirtstudent@norca.click" \
   --role "Log Analytics Reader" \
   --scope /subscriptions/<YOUR_SUBSCRIPTION_ID>/resourceGroups/<YOUR_RESOURCE_GROUP>
 ```
