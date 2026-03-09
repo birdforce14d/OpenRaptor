@@ -8,10 +8,10 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 >
 > | Role | Go to |
 > |------|-------|
-> | 🧑‍💼 **Tenant Admin** | [Step 7 — Configure Student Access](#step-7--configure-student-access) — share Bastion access with students and launch a module |
+> | 🧑‍💼 **Tenant Admin** | [Lab Administration — Per-Module Scripts](#lab-administration--per-module-scripts) — run, verify, and reset labs between students |
 > | 🎓 **Student** | [Student Lab Guide](lab-guide/01-sharepoint-webshell.md) — start your training directly |
 >
-> ⬇️ **Steps 1–6 below** are only needed if you are self-hosting and deploying the lab from scratch in your own Azure tenant.
+> ⬇️ **All steps below** are only needed if you are self-hosting and deploying the lab from scratch in your own Azure tenant.
 
 ---
 
