@@ -31,28 +31,45 @@ az account show --query "{Name:name, SubscriptionId:id, TenantId:tenantId}" -o t
 
 ### Section 2 — Service Principal
 
-Create a service principal for us to deploy into your tenant. We need **two Azure roles** and **one Entra ID permission**:
+Create a service principal for us to deploy and manage the lab in your tenant. We need **two RBAC roles** and **one Entra ID API permission**:
+
+#### Step 1 — Create SP with Contributor role
 
 ```bash
-# 1. Create the SP with Contributor role
 az ad sp create-for-rbac \
   --name "sp-cirtlab-deploy" \
   --role "Contributor" \
   --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>" \
   --sdk-auth
+```
 
-# 2. Add User Access Administrator (for assigning roles to student accounts)
+> 📋 Copy the full JSON output — you will need `clientId`, `clientSecret`, and `tenantId`.
+
+#### Step 2 — Add User Access Administrator role
+
+```bash
 az role assignment create \
   --assignee "<SP_CLIENT_ID>" \
   --role "User Access Administrator" \
   --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
-
-# 3. Grant Entra ID permission (for creating student accounts)
-#    Portal: Entra ID → App registrations → sp-cirtlab-deploy
-#    → API permissions → Add a permission → Microsoft Graph
-#    → Application permissions → User.ReadWrite.All
-#    → Click "Grant admin consent"
 ```
+
+_Required to assign Log Analytics Reader role to student accounts._
+
+#### Step 3 — Grant Entra ID permission for student account creation
+
+```bash
+# Find the SP Object ID
+az ad sp show --id "<SP_CLIENT_ID>" --query id -o tsv
+```
+
+Then in Azure Portal:
+1. **Entra ID** → **App registrations** → find `sp-cirtlab-deploy`
+2. **API permissions** → **Add a permission** → **Microsoft Graph** → **Application permissions**
+3. Add: **`User.ReadWrite.All`**
+4. Click **Grant admin consent for your tenant**
+
+_Required to create student accounts programmatically._
 
 | Item | Your Value |
 |------|-----------|
@@ -202,9 +219,9 @@ Once we receive your handover, OD@CIRT.APAC will deploy and configure:
 
 | Account Type | Username Format | Password |
 |-------------|----------------|----------|
-| **Domain Admin** | `<DOMAIN>\cirtadmin` | _Provided in handover report_ |
-| **Domain Student User** | `<DOMAIN>\j.chen` | _Provided in handover report_ |
-| **Entra ID Student** | `student01@<YOUR_DOMAIN>` | _Provided in handover report_ |
+| **Domain Admin** | `NORCA\cirtadmin` | _Provided in your handover report_ |
+| **Domain Student User** | `NORCA\j.chen` | _Provided in your handover report_ |
+| **Entra ID Student** | `j.chen@norca.click` | _Provided in your handover report_ |
 
 > All account credentials will be included in your handover report after deployment.
 
@@ -215,7 +232,9 @@ Once we receive your handover, OD@CIRT.APAC will deploy and configure:
 Before sending:
 
 - [ ] Subscription ID, Tenant ID filled in
-- [ ] Service principal created with all 3 permission levels
+- [ ] Service principal created — Contributor role assigned
+- [ ] User Access Administrator role assigned to SP
+- [ ] Graph `User.ReadWrite.All` permission granted with admin consent
 - [ ] VM quota confirmed (8+ vCPUs)
 - [ ] Existing infrastructure documented
 - [ ] Lab config (org name, domain, email, student count) filled in
