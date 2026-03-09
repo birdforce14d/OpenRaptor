@@ -104,7 +104,7 @@ Each scenario is available in three modes:
 ### Deploy
 
 ```bash
-git clone https://github.com/birdforce14d/OpenRaptor.git
+git clone https://github.com/<your-org>/OpenRaptor.git
 cd OpenRaptor/infra/base
 
 cp terraform.tfvars.example terraform.tfvars
@@ -154,4 +154,4 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ---
 
-_Maintained by [OD@CIRT.APAC](https://github.com/birdforce14d/OpenRaptor)_
+_Maintained by OD@CIRT.APAC_
