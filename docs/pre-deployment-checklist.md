@@ -225,6 +225,7 @@ OD@CIRT.APAC publishes images to an Azure Community Gallery. You will need this 
 
 | Variable | Where to find it |
 |----------|-----------------|
+| `community_gallery_name` | Published in OpenRaptor repo README once live |
 | `image_location` | Must match the gallery's published region (e.g. `australiaeast`) |
 
 ### 8b — Available Images
@@ -239,10 +240,10 @@ OD@CIRT.APAC publishes images to an Azure Community Gallery. You will need this 
 ### 8c — Confirm Image Access
 
 ```bash
-# Verify you can see the community gallery images (gallery name provided by lab administrator)
+# Verify you can see the community gallery images
 az sig image-definition list-community \
   --location australiaeast \
-  --public-gallery-name <GALLERY_NAME_FROM_ADMIN> \
+  --public-gallery-name <COMMUNITY_GALLERY_NAME> \
   --query "[].name" -o table
 ```
 
