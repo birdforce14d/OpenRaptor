@@ -3,6 +3,8 @@
 This guide is for administrators deploying the OpenRaptor Cyber Range in a new Azure tenant.
 
 > **🚀 Managed Deployment?** If OD@CIRT.APAC is deploying the lab infrastructure for you, Steps 1–6 are already done. Jump directly to **[Step 7 — Configure Student Access](#step-7--configure-student-access)** to set up your students and start running labs.
+>
+> **🎓 Full Managed Setup?** If OD@CIRT.APAC is also creating student accounts for you, skip to **[Step 8 — Launch a Scenario Module](#step-8--launch-a-scenario-module)** — or go straight to the [Student Lab Guide](lab-guide/01-sharepoint-webshell.md) and start training.
 
 ---
 
