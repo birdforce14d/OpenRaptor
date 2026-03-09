@@ -277,15 +277,15 @@ cd infra/base && terraform destroy -auto-approve
 ## Troubleshooting
 
 ### SP01 SharePoint not responding after reboot
+
+If SP01 becomes unresponsive after a reboot, use the reset script to rebuild from the golden image:
+
 ```powershell
-# Run via Bastion on SP01
-Import-Module WebAdministration
-Set-ItemProperty "IIS:\AppPools\SharePoint - 80" -Name processModel.userName -Value "DOMAIN\cirtadmin"
-Set-ItemProperty "IIS:\AppPools\SharePoint - 80" -Name processModel.password -Value "<YOUR_ADMIN_PASSWORD>"
-Set-ItemProperty "IIS:\AppPools\SharePoint - 80" -Name processModel.identityType -Value 3
-Start-Service SPTimerV4, SPAdminV4, AppFabricCachingService, W3SVC
-Start-WebAppPool "SharePoint - 80"
+# On DC01 as Domain Admin
+.\scenarios\module-01-webshell\admin\lab_01_reset.ps1
 ```
+
+See the **Recovery Plan** section for manual rebuild steps if Terraform is unavailable.
 
 ### SP01 can't join domain
 ```powershell
