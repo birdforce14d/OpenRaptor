@@ -31,7 +31,7 @@ Write-Host ""
 # --- Step 1: Create AD accounts ---
 Write-Host "[1/4] Setting up AD accounts..." -ForegroundColor Yellow
 
-$password = ConvertTo-SecureString "<YOUR_STUDENT_PASSWORD>" -AsPlainText -Force
+$password = ConvertTo-SecureString "CirtApacStudent2026" -AsPlainText -Force
 
 # Create cirtstudent — the actual student login account
 if (-not (Get-ADUser -Filter {SamAccountName -eq "cirtstudent"} -ErrorAction SilentlyContinue)) {
@@ -70,6 +70,22 @@ if (-not (Get-ADUser -Filter {SamAccountName -eq "j.chen"} -ErrorAction Silently
     Set-ADAccountPassword -Identity "j.chen" -Reset -NewPassword $password
     Enable-ADAccount -Identity "j.chen"
     Write-Host "  [SKIP] j.chen already exists — password reset, account enabled" -ForegroundColor Yellow
+}
+
+
+# --- Step 1b: Fix SP01 SharePoint service account credentials (INC-003) ---
+# svc-sp-farm was baked into SP01 golden image with password Norca@2024!
+# DC01 setup creates it with CirtApacAdm!n2026 — this re-syncs to the image password.
+Write-Host "[1b/4] Fixing SP01 service account credentials..." -ForegroundColor Yellow
+$spSvcPass = "Norca@2024!"
+try {
+    sc.exe "\\$env:COMPUTERNAME" config SPTimerV4 obj= "NORCA\svc-sp-farm" password= $spSvcPass | Out-Null
+    sc.exe "\\$env:COMPUTERNAME" config SPWriterV4 obj= "NORCA\svc-sp-farm" password= $spSvcPass | Out-Null
+    sc.exe "\\$env:COMPUTERNAME" config SPAdminV4 obj= "NORCA\svc-sp-farm" password= $spSvcPass | Out-Null
+    Write-Host "  [OK] SP service credentials synced to image-baked password" -ForegroundColor Green
+} catch {
+    Write-Host "  [WARN] Could not update SP service credentials: $($_.Exception.Message)" -ForegroundColor Yellow
+    Write-Host "         Run manually on SP01 if SP services fail to start" -ForegroundColor Yellow
 }
 
 # --- Step 2: Deploy attack toolkit to Kali ---
