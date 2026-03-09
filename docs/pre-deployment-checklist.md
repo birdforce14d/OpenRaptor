@@ -227,17 +227,19 @@ Once complete, please confirm:
 
 > **⚠️ Security Notice:** The information collected above contains sensitive credentials. **Never send these via email or unencrypted chat.**
 
+📄 **Use the [Handover Sheet](handover-sheet.md)** — it has the full JSON template and step-by-step instructions.
+
 **Steps:**
 
-1. Save all values to a file (use the JSON template below)
-2. Compress with **7-Zip using AES-256 encryption and a strong password**:
+1. Download and complete the [Handover Sheet](handover-sheet.md)
+2. Save your values as `handover.json`
+3. Compress with **7-Zip using AES-256 encryption**:
    - Right-click the file → **7-Zip** → **Add to archive**
    - Set **Archive format:** `7z`
    - Set **Encryption method:** `AES-256`
-   - Enter a **strong password** (12+ characters, mixed case, numbers, symbols)
+   - Enter the **password provided to you by OD@CIRT.APAC** via a separate channel
    - ☑️ **Encrypt file names**
-3. Send the `.7z` file to OD@CIRT.APAC via your agreed channel
-4. Send the **password separately** via a **different channel** (e.g. file via email, password via Teams/Signal)
+4. Send the `.7z` file to OD@CIRT.APAC via the email address provided
 
 ### What to include:
 
