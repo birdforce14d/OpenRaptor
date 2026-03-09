@@ -212,3 +212,50 @@ Once we receive your completed checklist:
 ---
 
 _CIRT Cyber Range — Project Raptor | Last updated: 2026-03-08_
+
+---
+
+## ✅ Section 8 — Golden Images (Community Gallery)
+
+Virtual machines are deployed from pre-built golden images. Before deploying, confirm access to the Community Gallery.
+
+### 8a — Note the Community Gallery Reference
+
+The Raptor team publishes images to an Azure Community Gallery. You will need this reference for your `terraform.tfvars`:
+
+| Variable | Where to find it |
+|----------|-----------------|
+| `community_gallery_name` | Published in OpenRaptor repo README once live |
+| `image_location` | Must match the gallery's published region (e.g. `australiaeast`) |
+
+### 8b — Available Images
+
+| Image Definition | VM | Purpose |
+|---|---|---|
+| `dc01-base` | DC01 | AD DS + DNS, norca.click domain |
+| `sp01-module01-student` | SP01 | Clean SharePoint — noWS (Module 01 default) |
+| `sp01-module01` | SP01 | Pre-compromised SharePoint — webShelled (future modules) |
+| `kali01-base` | Kali01 | Kali with full attack toolkit |
+
+### 8c — Confirm Image Access
+
+```bash
+# Verify you can see the community gallery images
+az sig image-definition list-community \
+  --location australiaeast \
+  --public-gallery-name cirtraptorlab-732fa912-74d1-4049-831b-83781b188c49 \
+  --query "[].name" -o table
+```
+
+Expected output:
+```
+dc01-base
+kali01-base
+sp01-module01
+sp01-module01-student
+```
+
+- [ ] Community gallery name noted
+- [ ] All 4 image definitions visible from your subscription
+- [ ] `image_location` matches gallery region
+
