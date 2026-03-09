@@ -223,13 +223,21 @@ Once complete, please confirm:
 
 > **⚠️ Security Notice:** The information collected above contains sensitive credentials. **Never send these via email or unencrypted chat.**
 
-### Recommended Handover Methods (pick one):
+### How to Send Us Your Details
 
-| Method | How |
-|--------|-----|
-| 🔐 **Azure Key Vault** _(preferred)_ | Create a Key Vault in your subscription, store all values as secrets, and grant `sp-cirtlab-deploy` access. Share only the Key Vault name with us. |
-| 🔒 **Encrypted file** | Save all values to a JSON/YAML file, encrypt with GPG or 7-Zip (AES-256), and share via your organisation's secure file transfer. Send the password separately via a different channel. |
-| 🛡️ **Organisation secrets manager** | If your org uses HashiCorp Vault, 1Password Teams, or similar — share via your existing secrets platform and grant us read access. |
+> **⚠️ Security Notice:** The information collected above contains sensitive credentials. **Never send these via email or unencrypted chat.**
+
+**Steps:**
+
+1. Save all values to a file (use the JSON template below)
+2. Compress with **7-Zip using AES-256 encryption and a strong password**:
+   - Right-click the file → **7-Zip** → **Add to archive**
+   - Set **Archive format:** `7z`
+   - Set **Encryption method:** `AES-256`
+   - Enter a **strong password** (12+ characters, mixed case, numbers, symbols)
+   - ☑️ **Encrypt file names**
+3. Send the `.7z` file to OD@CIRT.APAC via your agreed channel
+4. Send the **password separately** via a **different channel** (e.g. file via email, password via Teams/Signal)
 
 ### What to include:
 
