@@ -22,7 +22,7 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 ### Licensing Requirements
 - **Entra ID P1** (minimum) — for conditional access and risk-based sign-in logs
 - **Microsoft 365 E3 or SharePoint Online Plan 2** — for SharePoint and unified audit log
-- **MDE** — optional, see `{{MDE_LICENSE_DETAILS}}`
+- **MDE** — optional. If available, Microsoft Defender for Endpoint provides device-level telemetry and timeline analysis. Not required for core labs
 
 ---
 
@@ -164,7 +164,7 @@ In `infra/base/terraform.tfvars`, set the gallery reference:
 
 ```hcl
 # Community Gallery — source of golden images
-community_gallery_name = "cirtraptorlab-732fa912-74d1-4049-831b-83781b188c49"   # from OpenRaptor README — published by OD@CIRT.APAC
+community_gallery_name = "<COMMUNITY_GALLERY_NAME>"   # Published in README once images are live
 image_location         = "australiaeast"               # must match gallery region
 ```
 

@@ -243,7 +243,7 @@ OD@CIRT.APAC publishes images to an Azure Community Gallery. You will need this 
 # Verify you can see the community gallery images
 az sig image-definition list-community \
   --location australiaeast \
-  --public-gallery-name cirtraptorlab-732fa912-74d1-4049-831b-83781b188c49 \
+  --public-gallery-name <COMMUNITY_GALLERY_NAME> \
   --query "[].name" -o table
 ```
 

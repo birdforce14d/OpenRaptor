@@ -132,7 +132,7 @@ AzureActivity
 ```
 
 > 🔵 **MDE (Optional):** If Microsoft Defender for Endpoint is licensed and onboarded, verify devices are reporting in the [Microsoft 365 Defender portal](https://security.microsoft.com). Navigate to **Devices** → confirm all lab VMs appear with status **Active**.
-> _{{MDE_ONBOARDING_DETAILS — to be completed if MDE is provisioned}}_
+> _**MDE (Optional):** If Microsoft Defender for Endpoint is deployed in your environment, your instructor will provide onboarding details separately._
 
 ### Step 5 — Network Reconnaissance (from Kali)
 
