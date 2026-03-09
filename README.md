@@ -1,4 +1,4 @@
-# CIRT Cyber Range — Project Raptor
+# OpenRaptor Cyber Range — OpenRaptor
 
 > A modular, Azure-hosted cyber range for CIRT analyst training in threat detection, log analysis, and incident response.
 
@@ -10,7 +10,7 @@
 
 ## Overview
 
-Project Raptor is a modular Azure-based cyber range designed for CIRT (Cyber Incident Response Team) analyst training. It provides realistic, narrative-driven attack scenarios with telemetry flowing into Azure Log Analytics — so analysts can practice detection and investigation using the same tools they use in production.
+OpenRaptor is a modular Azure-based cyber range designed for CIRT (Cyber Incident Response Team) analyst training. It provides realistic, narrative-driven attack scenarios with telemetry flowing into Azure Log Analytics — so analysts can practice detection and investigation using the same tools they use in production.
 
 The design principle is **plug-and-play**: a permanent base infrastructure (domain controller, logging, network) plus disposable scenario modules that can be deployed, used, and destroyed independently. Resetting the lab for a new student takes approximately five minutes.
 
