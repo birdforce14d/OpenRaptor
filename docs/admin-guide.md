@@ -129,17 +129,55 @@ Expected resources created:
 
 ## Step 5 — Deploy Virtual Machines
 
+### DC01 and SP01 (Terraform)
+
 ```bash
 cd ../modules/dc01
 terraform init && terraform apply -auto-approve
 
 cd ../sp01
 terraform init && terraform apply -auto-approve
-
-# Optional
-cd ../kali01
-terraform init && terraform apply -auto-approve
 ```
+
+### Kali01 (Azure Marketplace)
+
+Deploy Kali Linux from the Azure Marketplace:
+
+```bash
+# Accept the Marketplace terms for Kali Linux
+az vm image terms accept --publisher kali-linux --offer kali --plan kali-2025-1 --output none
+
+# Deploy Kali VM
+az vm create \
+  --resource-group <RESOURCE_GROUP> \
+  --name kali01 \
+  --image kali-linux:kali:kali-2025-1:latest \
+  --size Standard_D2s_v3 \
+  --vnet-name <VNET_NAME> \
+  --subnet snet-attacker \
+  --private-ip-address 10.10.3.10 \
+  --public-ip-address "" \
+  --admin-username kali \
+  --admin-password "<STUDENT_PASSWORD>" \
+  --nsg "" \
+  --no-wait
+```
+
+> 📝 **Note:** If the Kali plan above is unavailable in your region, list available plans:
+> ```bash
+> az vm image list --publisher kali-linux --all --output table
+> ```
+
+Once Kali01 is running, SSH in via Bastion and run the setup script to stage the attack toolkit:
+
+```bash
+# On Kali01 (via Bastion SSH)
+curl -sL https://raw.githubusercontent.com/birdforce14d/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh | sudo bash
+```
+
+This downloads and stages all Module 01 files to `/opt/raptor/module-01/` — the attack script, student preflight check, and webshell payload.
+
+> ✅ **Verify:** `ls /opt/raptor/module-01/` should show `attack.sh`, `check-lab-01.sh`, and `payloads/help.aspx`.
 
 > ⏳ VM provisioning takes **20–30 minutes** per VM including extensions and domain setup.
 
