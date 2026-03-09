@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # Module 01 — SharePoint Webshell Attack Simulation
-# OpenRaptor — OpenRaptor Cyber Range
+# OpenRaptor Cyber Range — CIRT APAC
 #
 # This script simulates a webshell attack against SharePoint.
 # It uploads a benign ASPX webshell and executes reconnaissance commands
@@ -20,7 +20,6 @@ set -e
 SP_URL="http://sharepoint.norca.click"
 WEBSHELL_PATH="/Shared%20Documents/help.aspx"
 CREDS="NORCA\\j.chen:<YOUR_STUDENT_PASSWORD>"
-# TODO: Update this URL once <lab-owner> creates the public student repo
 PAYLOAD_REPO_URL="https://github.com/birdforce14d/OpenRaptor/raw/main/module-01/payloads/help.aspx"
 WEBSHELL_FILE="$(dirname "$0")/payloads/help.aspx"
 
