@@ -217,12 +217,12 @@ Once we receive your handover, OD@CIRT.APAC will deploy and configure:
 
 ### Pre-configured Accounts (created by us):
 
-| Account Type | Username Format | Purpose |
-|-------------|----------------|---------|
-| **Domain Admin** | `NORCA\cirtadmin` | Lab administration and script execution |
-| **Domain Student** | `NORCA\cirtstudent` | Student login for lab exercises |
-| **Entra ID Student** | `cirtstudent@norca.click` | Azure Portal and Bastion access |
-| **Compromised User** _(scenario)_ | `NORCA\j.chen` | Compromised account used in attack scenarios — _not for student login_ |
+| Account | Purpose | Password |
+|---------|---------|----------|
+| `NORCA\cirtadmin` | Domain Admin | _In your handover report_ |
+| `NORCA\cirtstudent` | **Student login** — lab exercises | _In your handover report_ |
+| `cirtstudent@norca.click` | **Entra ID student** — Azure Portal / Bastion | _In your handover report_ |
+| `NORCA\j.chen` | Scenario character (compromised Finance Analyst) — not a student login | _In your handover report_ |
 
 > All account credentials will be included in your handover report after deployment.
 
