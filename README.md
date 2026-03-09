@@ -88,8 +88,8 @@ Each scenario is available in three modes:
 │       ├── 00-orientation.md
 │       ├── 01-sharepoint-webshell.md
 │       └── ...
-└── scripts/
-    └── reset-lab.sh   # One-command lab reset for instructors
+└── scenarios/
+    └── module-01-webshell/  # Attack scripts, payloads, admin/student tools
 ```
 
 ---
@@ -119,9 +119,7 @@ Full deployment instructions: [docs/admin-guide.md](docs/admin-guide.md)
 
 ### Reset Lab for a New Student
 
-```bash
-# See docs/admin-guide.md for reset instructions
-```
+Reset is handled per-module via admin scripts on DC01. See [docs/admin-guide.md](docs/admin-guide.md) for details.
 
 Destroys and rebuilds the scenario VM from a clean golden image. Takes approximately five minutes.
 

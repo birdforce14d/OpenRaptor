@@ -12,8 +12,8 @@
 
 set -e
 
-# Update <your-org> to your GitHub organisation before running
-REPO_BASE="https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scenarios/module-01-webshell"
+# Update birdforce14d to your GitHub organisation before running
+REPO_BASE="https://raw.githubusercontent.com/birdforce14d/OpenRaptor/main/scenarios/module-01-webshell"
 DEST="/opt/raptor/module-01"
 
 GREEN='\033[0;32m'

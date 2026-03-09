@@ -29,21 +29,21 @@ By the end of this module, you will:
 ```
 ┌─────────────────────────────────────────────────┐
 │              VNet: norca.click-vnet              │
-│                  10.0.0.0/16                    │
+│                  10.10.0.0/16                    │
 │                                                 │
 │  ┌──────────────┐  ┌──────────────┐            │
 │  │  Management  │  │   Target     │            │
 │  │  Subnet      │  │   Subnet     │            │
-│  │  10.0.1.0/24 │  │  10.0.2.0/24 │            │
+│  │  10.10.1.0/24 │  │  10.10.2.0/24 │            │
 │  │              │  │              │            │
 │  │  • Bastion   │  │  • DC01      │            │
-│  │  • Kali      │  │  • WS01     │            │
+│  │  • Kali      │  │  • WS01 *   │            │
 │  └──────────────┘  └──────────────┘            │
 │                                                 │
 │  ┌──────────────┐  ┌──────────────┐            │
 │  │   Attack     │  │  Monitoring  │            │
 │  │   Subnet     │  │  Subnet      │            │
-│  │  10.0.3.0/24 │  │  10.0.4.0/24 │            │
+│  │  10.10.3.0/24 │  │  10.10.4.0/24 │            │
 │  │              │  │              │            │
 │  │  (modules)   │  │  • LAW       │            │
 │  └──────────────┘  └──────────────┘            │
@@ -57,7 +57,7 @@ By the end of this module, you will:
 | Azure Bastion | Sole entry point to all VMs (no public IPs) | Management Subnet |
 | DC01 | Domain Controller, Active Directory DS | Target Subnet |
 | Kali | Attack simulation box | Management Subnet |
-| WS01 | Domain-joined Windows workstation | Target Subnet |
+| WS01 | Domain-joined Windows workstation *(future modules)* | Target Subnet |
 | Log Analytics Workspace | Central telemetry collection | Monitoring Subnet |
 
 ### Log Sources
@@ -140,10 +140,10 @@ AzureActivity
 2. Verify connectivity:
    ```bash
    # Can you reach the DC?
-   ping 10.0.2.4
+   ping 10.10.2.10
    
    # Scan the target subnet
-   nmap -sn 10.0.2.0/24
+   nmap -sn 10.10.2.0/24
    
    # Check available tools
    which nmap gobuster hashcat john hydra

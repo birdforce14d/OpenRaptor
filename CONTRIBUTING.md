@@ -17,7 +17,7 @@ Thank you for your interest in contributing to the OpenRaptor Cyber Range This d
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/<your-username>/raptor.git`
+2. Clone your fork: `git clone https://github.com/<your-username>/OpenRaptor.git`
 3. Create a feature branch: `git checkout -b feature/your-change`
 4. Make your changes (see guidelines below)
 5. Test your changes
@@ -73,7 +73,7 @@ Be respectful and constructive. We are all here to learn and improve detection c
 
 ## Questions?
 
-Open a [GitHub issue](https://github.com/<your-org>/OpenRaptor/issues) for questions, ideas, or discussion.
+Open a [GitHub issue](https://github.com/birdforce14d/OpenRaptor/issues) for questions, ideas, or discussion.
 
 ---
 

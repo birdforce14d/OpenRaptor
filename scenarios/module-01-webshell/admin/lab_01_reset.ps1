@@ -14,7 +14,7 @@
 # =============================================================================
 
 param(
-    [string]$ResourceGroup = "rg-cirtlab-core",
+    [string]$ResourceGroup = "<YOUR_RESOURCE_GROUP>",
     [string]$VMName = "win-norca-sp01",
     [string]$ImageId = "/subscriptions/<YOUR_SUBSCRIPTION_ID>/resourceGroups/<YOUR_RESOURCE_GROUP>/providers/Microsoft.Compute/galleries/<YOUR_GALLERY_NAME>/images/sp01-module01-student/versions/1.0.0",
     [int]$TimeoutMinutes = 15

@@ -21,7 +21,7 @@ You do **not** need to install anything.
 
 ### 1. Sign in to Azure Portal
 Go to [portal.azure.com](https://portal.azure.com) and sign in with your provided credentials:
-- Username: `student01@norca.click` (e.g. student01@norca.click)
+- Username: `student01@<YOUR_DOMAIN>` _(provided by your instructor)_
 - Password: _(provided by your instructor)_
 
 ### 2. Navigate to the Lab Environment
