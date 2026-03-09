@@ -1,6 +1,6 @@
 # =============================================================================
 # Module 01 — Lab Setup (Admin)
-# Project Raptor — CIRT Cyber Range
+# OpenRaptor — OpenRaptor Cyber Range
 #
 # Run on DC01 as Domain Admin BEFORE handing the lab to a student.
 # Sets up all scenario prerequisites for Module 01 (SharePoint Webshell).
