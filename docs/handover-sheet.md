@@ -31,7 +31,7 @@ az account show --query "{Name:name, SubscriptionId:id, TenantId:tenantId}" -o t
 
 ### Section 2 — Service Principal
 
-Create a service principal for us to deploy into your tenant. We need **two roles**:
+Create a service principal for us to deploy into your tenant. We need **two Azure roles** and **one Entra ID permission**:
 
 ```bash
 # 1. Create the SP with Contributor role
@@ -41,11 +41,17 @@ az ad sp create-for-rbac \
   --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>" \
   --sdk-auth
 
-# 2. Add User Access Administrator (for student account creation and RBAC)
+# 2. Add User Access Administrator (for assigning roles to student accounts)
 az role assignment create \
   --assignee "<SP_CLIENT_ID>" \
   --role "User Access Administrator" \
   --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
+
+# 3. Grant Entra ID permission (for creating student accounts)
+#    Portal: Entra ID → App registrations → sp-cirtlab-deploy
+#    → API permissions → Add a permission → Microsoft Graph
+#    → Application permissions → User.ReadWrite.All
+#    → Click "Grant admin consent"
 ```
 
 | Item | Your Value |

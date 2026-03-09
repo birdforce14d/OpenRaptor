@@ -47,7 +47,8 @@ We use a dedicated service principal to deploy infrastructure **and** manage stu
 
 The service principal needs:
 - **Contributor** on the subscription — for creating and managing Azure resources (VMs, VNets, Bastion, etc.)
-- **User Access Administrator** on the subscription — for creating student accounts and assigning RBAC roles
+- **User Access Administrator** on the subscription — for assigning RBAC roles to student accounts
+- **Microsoft Graph `User.ReadWrite.All`** (Entra ID) — for creating student accounts
 
 ### Option A — CLI (Recommended, ~2 minutes)
 
@@ -71,6 +72,13 @@ az role assignment create \
   --role "User Access Administrator" \
   --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
 ```
+
+Then grant **Entra ID permission** for student account creation:
+
+1. Azure Portal → **Entra ID** → **App registrations** → `sp-cirtlab-deploy`
+2. **API permissions** → **Add a permission** → **Microsoft Graph**
+3. Add **Application permission**: `User.ReadWrite.All`
+4. Click **Grant admin consent**
 
 Copy the entire JSON output — it looks like this:
 ```json
@@ -203,6 +211,7 @@ Once complete, please confirm:
 - [ ] Service principal created and credentials collected
 - [ ] SP has **Contributor** role on subscription
 - [ ] SP has **User Access Administrator** role on subscription
+- [ ] SP has **Microsoft Graph `User.ReadWrite.All`** permission (admin consent granted)
 - [ ] Subscription ID and Tenant ID noted
 - [ ] VM quota verified (10 vCPUs available in chosen region)
 - [ ] Existing infra documented (or "none — clean subscription")
