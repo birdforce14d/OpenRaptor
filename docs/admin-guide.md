@@ -144,14 +144,16 @@ VMs are deployed from pre-built golden images in the Azure Compute Gallery. This
 
 ### Available Golden Images
 
-| Image Definition | VM | Description |
-|---|---|---|
-| `dc01-base` | DC01 | Windows Server with AD DS, DNS, norca.click domain pre-configured |
-| `sp01-module01-student` | SP01 | SharePoint — **noWS (clean)** — no webshell. Use for Module 01 student path |
-| `sp01-module01` | SP01 | SharePoint — **webShelled** — pre-compromised. Reserved for future modules |
-| `kali01-base` | Kali | Kali Linux with full attack toolkit pre-installed at `/opt/raptor/` |
+| Image Definition | VM | Source | Description |
+|---|---|---|---|
+| `dc01-base` | DC01 | Community Gallery | Windows Server with AD DS, DNS, norca.click domain pre-configured |
+| `sp01-module01-student` | SP01 | Community Gallery | SharePoint — **noWS (clean)** — no webshell. Use for Module 01 student path |
+| `sp01-module01` | SP01 | Community Gallery | SharePoint — **webShelled** — pre-compromised. Reserved for future modules |
+| Kali01 | Kali | **Azure Marketplace** | Kali Linux — deployed directly from Marketplace (not Community Gallery) |
 
-> **Source:** Images are published to the Azure Community Gallery by OD@CIRT.APAC. The gallery name is provided directly to authorised deployers — contact us to request access.
+> **Community Gallery images (DC01, SP01):** Published by OD@CIRT.APAC. Gallery name provided directly to authorised deployers — contact us to request access.
+>
+> **Kali01:** Deployed from Azure Marketplace (`kali-linux` by Kali Linux). Cannot be distributed via Community Gallery due to Marketplace terms.
 
 ### Deploy from Images
 
@@ -163,8 +165,25 @@ cd ../sp01
 # Module 01 uses the noWS image — configured in sp01/main.tf
 terraform init && terraform apply -auto-approve
 
-cd ../kali01
-terraform init && terraform apply -auto-approve
+# Kali01 — deploy from Azure Marketplace (not Community Gallery)
+az vm create \
+  --resource-group <YOUR_RESOURCE_GROUP> \
+  --name kali01 \
+  --image "kali-linux:kali-linux:kali:latest" \
+  --size Standard_D2s_v3 \
+  --admin-username azureuser \
+  --admin-password "<YOUR_ADMIN_PASSWORD>" \
+  --vnet-name vnet-cirtlab \
+  --subnet subnet-kali \
+  --public-ip-address "" \
+  --nsg kali-nsg \
+  --location <YOUR_REGION>
+
+# Accept Marketplace terms first (one-time per subscription)
+az vm image terms accept \
+  --publisher kali-linux \
+  --offer kali-linux \
+  --plan kali
 ```
 
 > ⏳ VM provisioning from golden images takes **5–10 minutes** per VM (significantly faster than full provisioning).
@@ -204,6 +223,29 @@ Expected output:
 ```
 
 If any check fails, see **Troubleshooting** below.
+
+---
+
+## Step 6.5 — Lab Module Setup (Kali Toolkit Staging)
+
+After deployment, stage the attack toolkit for the active module onto Kali01. This runs from the orchestrator VM and is idempotent — safe to re-run.
+
+```bash
+# Module 01 — SharePoint Webshell
+bash scripts/lab_01_setup.sh
+```
+
+Expected output:
+```
+[OK] DC01 reachable
+[OK] SP01 reachable
+[OK] j.chen account created (or already exists)
+[OK] Kali01 toolkit staged at /opt/raptor/lab-01/
+[OK] SP01 in clean state (no webshell present)
+--- Lab 01 setup: READY ---
+```
+
+> Run this once after initial deployment and again after any full lab rebuild. Not required after SP01-only resets (reset-lab.sh handles SP01 state automatically).
 
 ---
 
@@ -492,20 +534,35 @@ Get-ADUser -Filter * | Measure-Object | Select Count
 
 ### Kali — Emergency Rebuild
 
-Kali is built from the `kali01-base` golden image which includes the full attack toolkit pre-installed at `/opt/raptor/`. Rebuild is safe at any time — no persistent state.
+Kali is deployed from **Azure Marketplace** (not Community Gallery — Marketplace terms prevent redistribution). Rebuild is safe at any time — no persistent state.
 
 ```bash
-cd infra
-terraform destroy -target module.kali01 -auto-approve
-terraform apply -target module.kali01 -auto-approve
+# Delete the existing Kali VM
+az vm delete --resource-group <YOUR_RESOURCE_GROUP> --name kali01 --yes
+
+# Accept Marketplace terms (if not already done)
+az vm image terms accept --publisher kali-linux --offer kali-linux --plan kali
+
+# Redeploy from Marketplace
+az vm create \
+  --resource-group <YOUR_RESOURCE_GROUP> \
+  --name kali01 \
+  --image "kali-linux:kali-linux:kali:latest" \
+  --size Standard_D2s_v3 \
+  --admin-username azureuser \
+  --admin-password "<YOUR_ADMIN_PASSWORD>" \
+  --vnet-name vnet-cirtlab \
+  --subnet subnet-kali \
+  --public-ip-address "" \
+  --location <YOUR_REGION>
 ```
 
-> After rebuild, run `lab_NN_setup.ps1` for the active module — this re-stages the module-specific toolkit from OpenRaptor to `/opt/raptor/lab-NN/`.
+> After rebuild, run `lab_NN_setup.ps1` for the active module — this re-stages the module toolkit from OpenRaptor to `/opt/raptor/lab-NN/`.
 
-**What the Kali golden image includes:**
-- Kali Linux (latest stable)
-- Pre-installed: `curl`, `nmap`, `impacket`, `crackmapexec`, `evil-winrm`, `responder`
-- `/opt/raptor/` directory structure (module scripts pulled at setup time)
+**Kali post-deploy setup (automated via `lab_NN_setup.ps1`):**
+- Installs: `curl`, `nmap`, `impacket`, `crackmapexec`, `evil-winrm`, `responder`
+- Creates `/opt/raptor/` directory structure
+- Pulls module scripts from OpenRaptor
 - Network pre-configured for lab VNet (`10.10.3.x` subnet)
 
 ---
