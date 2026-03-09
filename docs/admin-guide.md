@@ -2,12 +2,16 @@
 
 This guide is for administrators deploying the OpenRaptor Cyber Range in a new Azure tenant.
 
-> **🚀 Lab deployed by OD@CIRT.APAC?** Your environment is already set up and ready to go.
+> ## 🚀 Lab deployed by OD@CIRT.APAC?
 >
-> - **Admins:** Skip to **[Step 8 — Launch a Scenario Module](#step-8--launch-a-scenario-module)** for running and resetting labs.
-> - **Students:** Go directly to the **[Student Lab Guide](lab-guide/01-sharepoint-webshell.md)** and start training.
+> If OD@CIRT.APAC has deployed and handed over this lab environment to you, **your lab is ready — no setup required.**
 >
-> Steps 1–7 below are only needed if you're deploying the lab from scratch.
+> | Role | Go to |
+> |------|-------|
+> | 🧑‍💼 **Tenant Admin** | [Step 7 — Configure Student Access](#step-7--configure-student-access) — share Bastion access with students and launch a module |
+> | 🎓 **Student** | [Student Lab Guide](lab-guide/01-sharepoint-webshell.md) — start your training directly |
+>
+> ⬇️ **Steps 1–6 below** are only needed if you are self-hosting and deploying the lab from scratch in your own Azure tenant.
 
 ---
 
@@ -205,7 +209,13 @@ If any check fails, see **Troubleshooting** below.
 
 ## Step 7 — Configure Student Access
 
+> **📦 Managed deployment (OD@CIRT.APAC):** Student accounts, Log Analytics access, and scenario modules are pre-configured as part of the handover. Skip to [Share Bastion Access URL](#share-bastion-access-url) below to share access with your students.
+
+
 ### Create Student Accounts in Entra ID
+
+> ℹ️ *Skip this section if OD@CIRT.APAC deployed your lab — student accounts are already created.*
+
 
 ```bash
 # Create a student user
@@ -217,6 +227,9 @@ az ad user create \
 ```
 
 ### Assign Log Analytics Reader Role
+
+> ℹ️ *Skip this section if OD@CIRT.APAC deployed your lab — roles are already assigned.*
+
 
 ```bash
 az role assignment create \
@@ -230,7 +243,7 @@ az role assignment create \
 Students connect via Bastion:
 1. Azure Portal → Resource Group `<YOUR_RESOURCE_GROUP>`
 2. Select target VM → **Connect** → **Bastion**
-3. Use provided credentials
+3. Use the credentials provided in your lab handover document
 
 > 💡 You can also create a custom Azure Portal dashboard with direct links to each VM and the Log Analytics Workspace.
 
