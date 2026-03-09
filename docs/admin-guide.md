@@ -251,6 +251,8 @@ Students connect via Bastion:
 
 ## Step 8 — Launch a Scenario Module
 
+> **🚀 Deployed by OD@CIRT.APAC?** Your scenario module is already staged. Confirm with your OD@CIRT.APAC contact which module is active, then hand the [Lab Guide](lab-guide/01-sharepoint-webshell.md) to your students.
+
 ```bash
 # Example: Deploy the SharePoint webshell scenario
 cd infra/modules/sp-webshell

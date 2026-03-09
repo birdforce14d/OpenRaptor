@@ -1,5 +1,7 @@
 # Student Quickstart — OpenRaptor Cyber Range
 
+> **Your lab environment has been set up for you.** Use the credentials provided by your instructor to connect. No installation or deployment is required on your end.
+
 Welcome to the **NORCA OpenRaptor Cyber Range**.
 
 This is a hands-on threat hunting and incident response training environment. You'll investigate realistic attack scenarios, build detection skills, and practice writing incident reports.
