@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # Module 01 — Kali Setup (Admin)
-# Project Raptor — CIRT Cyber Range
+# OpenRaptor — OpenRaptor Cyber Range
 #
 # Run on Kali01 as root/sudo BEFORE handing the lab to a student.
 # Downloads and stages the attack toolkit from the public repo.
