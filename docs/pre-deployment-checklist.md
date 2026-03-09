@@ -52,25 +52,20 @@ The service principal needs:
 
 ### Option A — CLI (Recommended, ~2 minutes)
 
-```bash
-# Set your subscription first
-az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
+> **⚠️ PowerShell users:** All commands are single-line — copy and paste directly.
 
-# Create the service principal with Contributor role
-az ad sp create-for-rbac \
-  --name "sp-cirtlab-deploy" \
-  --role "Contributor" \
-  --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>" \
-  --sdk-auth
+```
+az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
+```
+
+```
+az ad sp create-for-rbac --name "sp-cirtlab-deploy" --role "Contributor" --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
 ```
 
 After creating the SP, grant **User Access Administrator** on the subscription:
 
-```bash
-az role assignment create \
-  --assignee "<SP_CLIENT_ID>" \
-  --role "User Access Administrator" \
-  --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
+```
+az role assignment create --assignee "<SP_CLIENT_ID>" --role "User Access Administrator" --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
 ```
 
 Then grant **Entra ID permission** for student account creation:

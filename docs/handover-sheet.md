@@ -31,52 +31,28 @@ az account show --query "{Name:name, SubscriptionId:id, TenantId:tenantId}" -o t
 
 ### Section 2 — Service Principal
 
-Create a service principal for us to deploy and manage the lab in your tenant. We need **two RBAC roles** and **one Entra ID API permission**:
+Create a service principal for us to deploy and manage the lab in your tenant. We need **two RBAC roles** and **one Entra ID API permission**.
+
+> **⚠️ PowerShell users:** All commands below are single-line — just copy and paste directly. No line continuation needed.
 
 #### Step 1 — Create SP with Contributor role
 
-Run this as a **single command** — copy the whole block at once:
+> **⚠️ PowerShell users:** All commands are single-line — just copy and paste directly.
 
-**PowerShell (Windows):**
-```powershell
-az ad sp create-for-rbac `
-  --name "sp-cirtlab-deploy" `
-  --role "Contributor" `
-  --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>" `
-  --sdk-auth
+```
+az ad sp create-for-rbac --name "sp-cirtlab-deploy" --role "Contributor" --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
 ```
 
-**Bash / Cloud Shell (Linux/Mac):**
-```bash
-az ad sp create-for-rbac \
-  --name "sp-cirtlab-deploy" \
-  --role "Contributor" \
-  --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>" \
-  --sdk-auth
-```
-
-> 📋 Copy the **full JSON output** — you will need `clientId`, `clientSecret`, `subscriptionId`, and `tenantId`.
-> ⚠️ The secret is shown **once only**. Save it immediately in a secure location — do NOT paste it into chat or email.
+> 📋 Copy the full JSON output — you will need `appId` (= Client ID), `password` (= Client Secret), and `tenant` (= Tenant ID).
+> ⚠️ The secret is shown **once only**. Save it immediately — do NOT paste it into chat or email.
 
 #### Step 2 — Add User Access Administrator role
 
-**PowerShell (Windows):**
-```powershell
-az role assignment create `
-  --assignee "<SP_CLIENT_ID>" `
-  --role "User Access Administrator" `
-  --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
+```
+az role assignment create --assignee "<SP_CLIENT_ID>" --role "User Access Administrator" --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
 ```
 
-**Bash / Cloud Shell:**
-```bash
-az role assignment create \
-  --assignee "<SP_CLIENT_ID>" \
-  --role "User Access Administrator" \
-  --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
-```
-
-_Required to assign Log Analytics Reader role to student accounts._
+Replace `<SP_CLIENT_ID>` with the `appId` value from Step 1.
 
 #### Step 3 — Grant Entra ID permission for student account creation
 
@@ -107,9 +83,8 @@ _Required to create student accounts programmatically._
 
 We deploy 3 VMs. Confirm you have at least **8 vCPUs** available in your chosen region:
 
-```bash
-az vm list-usage --location <YOUR_REGION> --output table \
-  | grep -E "Standard DSv3|Standard Bsv2|Total Regional"
+```
+az vm list-usage --location <YOUR_REGION> --output table | findstr /i "Standard DSv3 Total Regional"
 ```
 
 | VM | SKU | vCPUs |
