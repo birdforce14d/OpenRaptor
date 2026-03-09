@@ -64,7 +64,7 @@ _Start here if this is your first time in the lab._
 SSH into the Kali attack machine via Azure Bastion:
 
 1. Open the [Azure Portal](https://portal.azure.com)
-2. Navigate to **Resource Group** → `<RESOURCE_GROUP>` → `kali01`
+2. Navigate to **Resource Group** → `rg-cirtlab-core` → `kali01`
 3. Click **Connect** → **Bastion** → **SSH**
 4. Username: `kali` / Password: *(provided by your instructor)*
 
@@ -103,7 +103,7 @@ cd /opt/raptor/module-01
 >
 > The script will show you each step as it runs. Watch the output — in a real incident, this is what the attacker did before you got the call.
 
-> ✅ **Expected:** The script completes with `[✓] Attack simulation complete`. If it fails, check that SP01 is running and reachable from Kali (`ping <SP01_IP>`).
+> ✅ **Expected:** The script completes with `[✓] Attack simulation complete`. If it fails, check that SP01 is running and reachable from Kali (`ping 10.10.2.10`).
 
 > ⏱️ **Wait 2-3 minutes** after the script completes. This allows Windows Event Logs and IIS logs to flush and be available for your investigation.
 
@@ -120,7 +120,7 @@ cd /opt/raptor/module-01
 **Step 1.1 — Connect to SharePoint Server**
 
 RDP into `win-norca-sp01` via Azure Bastion:
-1. Azure Portal → `<RESOURCE_GROUP>` → `win-norca-sp01`
+1. Azure Portal → `rg-cirtlab-core` → `win-norca-sp01`
 2. Click **Connect** → **Bastion** → **RDP**
 3. Username: `NORCA\cirtadmin` / Password: *(provided by your instructor)*
 
