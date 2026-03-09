@@ -1,6 +1,6 @@
-# Contributing to Project Raptor
+# Contributing to OpenRaptor
 
-Thank you for your interest in contributing to the CIRT Cyber Range. This document outlines the process for contributing scenarios, fixes, and improvements.
+Thank you for your interest in contributing to the OpenRaptor Cyber Range This document outlines the process for contributing scenarios, fixes, and improvements.
 
 ---
 
