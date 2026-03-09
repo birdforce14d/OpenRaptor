@@ -35,6 +35,18 @@ Create a service principal for us to deploy and manage the lab in your tenant. W
 
 #### Step 1 — Create SP with Contributor role
 
+Run this as a **single command** — copy the whole block at once:
+
+**PowerShell (Windows):**
+```powershell
+az ad sp create-for-rbac `
+  --name "sp-cirtlab-deploy" `
+  --role "Contributor" `
+  --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>" `
+  --sdk-auth
+```
+
+**Bash / Cloud Shell (Linux/Mac):**
 ```bash
 az ad sp create-for-rbac \
   --name "sp-cirtlab-deploy" \
@@ -43,10 +55,20 @@ az ad sp create-for-rbac \
   --sdk-auth
 ```
 
-> 📋 Copy the full JSON output — you will need `clientId`, `clientSecret`, and `tenantId`.
+> 📋 Copy the **full JSON output** — you will need `clientId`, `clientSecret`, `subscriptionId`, and `tenantId`.
+> ⚠️ The secret is shown **once only**. Save it immediately in a secure location — do NOT paste it into chat or email.
 
 #### Step 2 — Add User Access Administrator role
 
+**PowerShell (Windows):**
+```powershell
+az role assignment create `
+  --assignee "<SP_CLIENT_ID>" `
+  --role "User Access Administrator" `
+  --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
+```
+
+**Bash / Cloud Shell:**
 ```bash
 az role assignment create \
   --assignee "<SP_CLIENT_ID>" \
@@ -58,8 +80,8 @@ _Required to assign Log Analytics Reader role to student accounts._
 
 #### Step 3 — Grant Entra ID permission for student account creation
 
-```bash
-# Find the SP Object ID
+```powershell
+# PowerShell / Bash (same syntax for this command)
 az ad sp show --id "<SP_CLIENT_ID>" --query id -o tsv
 ```
 
