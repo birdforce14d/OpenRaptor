@@ -22,7 +22,7 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 ### Licensing Requirements
 - **Entra ID P1** (minimum) — for conditional access and risk-based sign-in logs
 - **Microsoft 365 E3 or SharePoint Online Plan 2** — for SharePoint and unified audit log
-- **MDE** — optional, see `{{MDE_LICENSE_DETAILS}}`
+- **MDE** — optional. If available, Microsoft Defender for Endpoint provides device-level telemetry and timeline analysis. Not required for core labs
 
 ---
 
@@ -58,7 +58,7 @@ Save the output — you'll need it in Step 3:
 ## Step 2 — Clone the Repo
 
 ```bash
-git clone https://github.com/birdforce14d/OpenRaptor.git
+git clone https://github.com/<your-org>/OpenRaptor.git
 cd OpenRaptor
 ```
 
@@ -163,7 +163,8 @@ terraform init && terraform apply -auto-approve
 In `infra/base/terraform.tfvars`, set the gallery reference:
 
 ```hcl
-# Golden images — provided by your lab administrator
+# Community Gallery — source of golden images
+community_gallery_name = "<COMMUNITY_GALLERY_NAME>"   # Published in README once images are live
 image_location         = "australiaeast"               # must match gallery region
 ```
 
@@ -525,7 +526,7 @@ Full rebuild: ~45–60 minutes.
 
 ## Support
 
-For issues, open a GitHub issue at [birdforce14d/OpenRaptor](https://github.com/birdforce14d/OpenRaptor/issues).
+For issues, open a GitHub issue at [<your-org>/OpenRaptor](https://github.com/<your-org>/OpenRaptor/issues).
 
 ---
 
