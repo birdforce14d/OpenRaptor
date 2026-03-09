@@ -1,6 +1,6 @@
-# Admin Deployment Guide — CIRT Cyber Range
+# Admin Deployment Guide — OpenRaptor Cyber Range
 
-This guide is for administrators deploying the CIRT Cyber Range in a new Azure tenant.
+This guide is for administrators deploying the OpenRaptor Cyber Range in a new Azure tenant.
 
 ---
 
@@ -58,8 +58,8 @@ Save the output — you'll need it in Step 3:
 ## Step 2 — Clone the Repo
 
 ```bash
-git clone https://github.com/birdforce14d/raptor.git
-cd raptor
+git clone https://github.com/birdforce14d/OpenRaptor.git
+cd OpenRaptor
 ```
 
 ---
@@ -164,7 +164,7 @@ In `infra/base/terraform.tfvars`, set the gallery reference:
 
 ```hcl
 # Community Gallery — source of golden images
-community_gallery_name = "cirtraptorlab-732fa912-74d1-4049-831b-83781b188c49"   # provided by Raptor team
+community_gallery_name = "cirtraptorlab-732fa912-74d1-4049-831b-83781b188c49"   # from OpenRaptor README
 image_location         = "australiaeast"               # must match gallery region
 ```
 
@@ -327,7 +327,7 @@ Every module ships **three admin scripts** (run from DC01) and **one student scr
 | `admin/lab_NN_reset.ps1` | Admin | DC01 | Reset: rebuild VM(s) from golden image between students |
 | `student/check-lab-NN.sh` | Student | Kali01 | Student preflight: confirm environment is ready before starting |
 
-> ⚠️ **All admin scripts run from DC01 as Domain Admin.** Never run reset scripts from the orchestrator VM.
+> ⚠️ **All admin scripts run from DC01 as Domain Admin.** Never run reset scripts from the management workstation.
 
 ---
 
@@ -526,7 +526,7 @@ Full rebuild: ~45–60 minutes.
 
 ## Support
 
-For issues, open a GitHub issue at `birdforce14d/raptor`.
+For issues, open a GitHub issue at `<your-github-org>/OpenRaptor`.
 
 ---
 
