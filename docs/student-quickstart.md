@@ -1,7 +1,5 @@
 # Student Quickstart — OpenRaptor Cyber Range
 
-> **Your lab environment has been set up for you.** Use the credentials provided by your instructor to connect. No installation or deployment is required on your end.
-
 Welcome to the **NORCA OpenRaptor Cyber Range**.
 
 This is a hands-on threat hunting and incident response training environment. You'll investigate realistic attack scenarios, build detection skills, and practice writing incident reports.
@@ -23,7 +21,7 @@ You do **not** need to install anything.
 
 ### 1. Sign in to Azure Portal
 Go to [portal.azure.com](https://portal.azure.com) and sign in with your provided credentials:
-- Username: `student01@<YOUR_DOMAIN>` _(provided by your instructor)_
+- Username: `cirtstudent@norca.click` (e.g. cirtstudent@norca.click)
 - Password: _(provided by your instructor)_
 
 ### 2. Navigate to the Lab Environment
