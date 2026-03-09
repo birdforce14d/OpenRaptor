@@ -1,6 +1,6 @@
-# Student Quickstart — CIRT Cyber Range
+# Student Quickstart — OpenRaptor Cyber Range
 
-Welcome to the **NORCA CIRT Cyber Range**.
+Welcome to the **NORCA OpenRaptor Cyber Range**.
 
 This is a hands-on threat hunting and incident response training environment. You'll investigate realistic attack scenarios, build detection skills, and practice writing incident reports.
 
