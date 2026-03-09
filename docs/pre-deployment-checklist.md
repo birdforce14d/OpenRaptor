@@ -122,8 +122,7 @@ We need:
 |--------|-------|-------|---------|
 | Standard_D2s_v3 | 2 | 2 | DC01 + Kali01 |
 | Standard_D4s_v3 | 4 | 1 | SP01 (SharePoint) |
-| Standard_B2ms | 2 | 1 | Orchestrator |
-| **Total vCPUs** | **10** | | |
+| **Total vCPUs** | **8** | | |
 
 > If quota is insufficient: Azure Portal → Subscriptions → Usage + quotas → request increase.
 
