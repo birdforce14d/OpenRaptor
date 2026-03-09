@@ -7,7 +7,7 @@
 #
 # What this script does:
 #   1. Destroys current SP01 VM
-#   2. Rebuilds SP01 from golden image (gal_cirt_raptor/sp01-module01/1.0.0)
+#   2. Rebuilds SP01 from golden image (sp01-module01-student/1.0.0)
 #   3. Waits for SP01 to boot and join domain
 #   4. Re-runs lab_01_setup.ps1 to ensure accounts and tools are ready
 #   5. Runs lab_01_check.ps1 to verify clean state

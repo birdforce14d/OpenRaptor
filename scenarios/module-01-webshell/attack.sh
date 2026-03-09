@@ -8,7 +8,7 @@
 # to generate the evidence trail that students will investigate.
 #
 # PRE-REQUISITES:
-#   - j.chen AD account exists (created by seed-domain.ps1)
+#   - j.chen AD account exists (created by lab_01_setup.ps1 on DC01)
 #   - SP01 is running and reachable at sharepoint.norca.click
 #   - curl is installed on Kali
 #
@@ -16,6 +16,11 @@
 # =============================================================================
 
 set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
 SP_URL="http://sharepoint.norca.click"
 WEBSHELL_PATH="/Shared%20Documents/help.aspx"
@@ -34,11 +39,6 @@ if [ ! -f "$WEBSHELL_FILE" ]; then
         exit 1
     fi
 fi
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
 
 echo -e "${YELLOW}╔══════════════════════════════════════════════╗${NC}"
 echo -e "${YELLOW}║  Module 01 — Webshell Attack Simulation      ║${NC}"

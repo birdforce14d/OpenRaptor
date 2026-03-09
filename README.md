@@ -105,7 +105,7 @@ Each scenario is available in three modes:
 
 ```bash
 git clone https://github.com/birdforce14d/OpenRaptor.git
-cd raptor/infra/base
+cd OpenRaptor/infra/base
 
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars with your values

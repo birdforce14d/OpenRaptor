@@ -281,7 +281,7 @@ cd infra/base && terraform destroy -auto-approve
 # Run via Bastion on SP01
 Import-Module WebAdministration
 Set-ItemProperty "IIS:\AppPools\SharePoint - 80" -Name processModel.userName -Value "DOMAIN\cirtadmin"
-Set-ItemProperty "IIS:\AppPools\SharePoint - 80" -Name processModel.password -Value "YOUR_PASSWORD"
+Set-ItemProperty "IIS:\AppPools\SharePoint - 80" -Name processModel.password -Value "<YOUR_ADMIN_PASSWORD>"
 Set-ItemProperty "IIS:\AppPools\SharePoint - 80" -Name processModel.identityType -Value 3
 Start-Service SPTimerV4, SPAdminV4, AppFabricCachingService, W3SVC
 Start-WebAppPool "SharePoint - 80"
@@ -526,7 +526,7 @@ Full rebuild: ~45–60 minutes.
 
 ## Support
 
-For issues, open a GitHub issue at `<your-github-org>/OpenRaptor`.
+For issues, open a GitHub issue at [birdforce14d/OpenRaptor](https://github.com/birdforce14d/OpenRaptor/issues).
 
 ---
 
