@@ -1,6 +1,6 @@
 # =============================================================================
 # Module 01 — Lab Reset (Admin)
-# OpenRaptor Cyber Range — CIRT APAC
+# OpenRaptor Cyber Range — OD@CIRT.APAC
 #
 # Run on DC01 as Domain Admin to reset Module 01 for a new student.
 # Rebuilds SP01 from golden image and re-seeds scenario prerequisites.
