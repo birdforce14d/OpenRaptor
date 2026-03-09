@@ -8,10 +8,10 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 >
 > | Role | Go to |
 > |------|-------|
-> | 🧑‍💼 **Tenant Admin** | [Lab Administration — Per-Module Scripts](#lab-administration--per-module-scripts) — run, verify, and reset labs between students |
+> | 🧑‍💼 **Tenant Admin** | Jump to [Lab Administration — Per-Module Scripts](#lab-administration--per-module-scripts) — everything is pre-deployed, just run and reset modules |
 > | 🎓 **Student** | [Student Lab Guide](lab-guide/01-sharepoint-webshell.md) — start your training directly |
 >
-> ⬇️ **All steps below** are only needed if you are self-hosting and deploying the lab from scratch in your own Azure tenant.
+> ⬇️ **Steps 1–8 below** are only needed if you are self-hosting and deploying the lab from scratch in your own Azure subscription.
 
 ---
 
@@ -250,8 +250,6 @@ Students connect via Bastion:
 ---
 
 ## Step 8 — Launch a Scenario Module
-
-> **🚀 Deployed by OD@CIRT.APAC?** Your scenario module is already staged. Confirm with your OD@CIRT.APAC contact which module is active, then hand the [Lab Guide](lab-guide/01-sharepoint-webshell.md) to your students.
 
 ```bash
 # Example: Deploy the SharePoint webshell scenario
