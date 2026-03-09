@@ -1,4 +1,4 @@
-# CIRT Cyber Range — Pre-Deployment Checklist
+# OpenRaptor Cyber Range — Pre-Deployment Checklist
 
 _Please complete all items below before we begin deployment. This typically takes 15–30 minutes._
 
@@ -122,7 +122,8 @@ We need:
 |--------|-------|-------|---------|
 | Standard_D2s_v3 | 2 | 2 | DC01 + Kali01 |
 | Standard_D4s_v3 | 4 | 1 | SP01 (SharePoint) |
-| **Total vCPUs** | **8** | | |
+| Standard_B2ms | 2 | 1 | Management host |
+| **Total vCPUs** | **10** | | |
 
 > If quota is insufficient: Azure Portal → Subscriptions → Usage + quotas → request increase.
 
@@ -210,7 +211,7 @@ Once we receive your completed checklist:
 
 ---
 
-_CIRT Cyber Range — Project Raptor | Last updated: 2026-03-08_
+_OpenRaptor Cyber Range — OpenRaptor | Last updated: 2026-03-08_
 
 ---
 
@@ -220,7 +221,7 @@ Virtual machines are deployed from pre-built golden images. Before deploying, co
 
 ### 8a — Note the Community Gallery Reference
 
-The Raptor team publishes images to an Azure Community Gallery. You will need this reference for your `terraform.tfvars`:
+OpenRaptor publishes images to an Azure Community Gallery. You will need this reference for your `terraform.tfvars`:
 
 | Variable | Where to find it |
 |----------|-----------------|
