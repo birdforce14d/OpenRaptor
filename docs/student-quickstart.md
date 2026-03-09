@@ -26,7 +26,7 @@ Go to [portal.azure.com](https://portal.azure.com) and sign in with your provide
 
 ### 2. Navigate to the Lab Environment
 1. In the Azure Portal search bar, type **Resource Groups**
-2. Select `<RESOURCE_GROUP>`
+2. Select `rg-cirtlab-core`
 3. You'll see the lab resources
 
 ### 3. Connect to a VM via Bastion
