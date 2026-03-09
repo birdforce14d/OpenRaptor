@@ -151,3 +151,7 @@ Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+_Maintained by [CIRT APAC](https://github.com/birdforce14d/OpenRaptor)_
