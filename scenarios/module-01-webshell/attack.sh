@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # Module 01 — SharePoint Webshell Attack Simulation
-# OpenRaptor Cyber Range — CIRT APAC
+# OpenRaptor Cyber Range — OD@CIRT.APAC
 #
 # This script simulates a webshell attack against SharePoint.
 # It uploads a benign ASPX webshell and executes reconnaissance commands
