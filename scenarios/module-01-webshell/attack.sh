@@ -20,8 +20,8 @@ set -e
 SP_URL="http://sharepoint.norca.click"
 WEBSHELL_PATH="/Shared%20Documents/help.aspx"
 CREDS="NORCA\\j.chen:<YOUR_STUDENT_PASSWORD>"
-# Update this URL if hosting payloads from a different repository
-PAYLOAD_REPO_URL="https://github.com/birdforce14d/OpenRaptor/raw/main/scenarios/module-01-webshell/payloads/help.aspx"
+# TODO: Update this URL once BirdForce creates the public student repo
+PAYLOAD_REPO_URL="https://github.com/birdforce14d/OpenRaptor/raw/main/module-01/payloads/help.aspx"
 WEBSHELL_FILE="$(dirname "$0")/payloads/help.aspx"
 
 # Download webshell if not already present
