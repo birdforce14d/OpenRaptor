@@ -1,6 +1,6 @@
 # =============================================================================
 # Module 01 — Lab Check (Admin)
-# OpenRaptor Cyber Range — CIRT APAC
+# OpenRaptor Cyber Range — OD@CIRT.APAC
 #
 # Run on DC01 as Domain Admin to verify the lab is ready for a student.
 # This checks every prerequisite for Module 01.
