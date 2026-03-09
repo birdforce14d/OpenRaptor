@@ -101,21 +101,21 @@ Each scenario is available in three modes:
 - Terraform v1.5+
 - Azure CLI v2.50+
 
-### Deploy
+### Option A — Managed Deployment (Recommended)
 
-```bash
-git clone https://github.com/<your-org>/OpenRaptor.git
-cd OpenRaptor/infra/base
+OD@CIRT.APAC deploys a lab-ready environment into your Azure tenant. Complete the [Pre-Deployment Checklist](docs/pre-deployment-checklist.md) and send it to us — we handle the rest.
 
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values
+### Option B — Self-Deployment (Manual)
 
-terraform init
-terraform plan
-terraform apply
-```
+Deploy the full lab from scratch using Azure CLI and PowerShell. No Terraform or golden images required.
 
-Full deployment instructions: [docs/admin-guide.md](docs/admin-guide.md)
+**[Self-Deployment Guide](docs/self-deployment-guide.md)** — step-by-step instructions.
+
+### Option C — Self-Deployment (Terraform)
+
+Use the Terraform modules in `infra/` for automated deployment with golden images.
+
+Full instructions: [Admin Guide](docs/admin-guide.md)
 
 ### Reset Lab for a New Student
 

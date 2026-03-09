@@ -2,16 +2,16 @@
 
 This guide is for administrators deploying the OpenRaptor Cyber Range in a new Azure tenant.
 
-> ## 🚀 Lab deployed by OD@CIRT.APAC?
+> ## 🚀 How was your lab deployed?
 >
-> If OD@CIRT.APAC has deployed and handed over this lab environment to you, **your lab is ready — no setup required.**
->
-> | Role | Go to |
-> |------|-------|
-> | 🧑‍💼 **Tenant Admin** | Jump to [Lab Administration — Per-Module Scripts](#lab-administration--per-module-scripts) — everything is pre-deployed, just run and reset modules |
+> | Deployment method | Go to |
+> |-------------------|-------|
+> | **OD@CIRT.APAC deployed it for you** | Jump to [Lab Administration — Per-Module Scripts](#lab-administration--per-module-scripts) — your lab is ready |
+> | **Self-hosting (manual, no Terraform)** | **[Self-Deployment Guide](self-deployment-guide.md)** — full Azure CLI + PowerShell walkthrough |
+> | **Self-hosting (Terraform)** | Continue with Steps 1–8 below |
 > | 🎓 **Student** | [Student Lab Guide](lab-guide/01-sharepoint-webshell.md) — start your training directly |
 >
-> ⬇️ **Steps 1–8 below** are only needed if you are self-hosting and deploying the lab from scratch in your own Azure subscription.
+> ⬇️ Steps 1–8 below use Terraform and golden images. For a manual deployment, see the [Self-Deployment Guide](self-deployment-guide.md).
 
 ---
 
@@ -87,7 +87,7 @@ Save the output — you'll need it in Step 3:
 ## Step 2 — Clone the Repo
 
 ```bash
-git clone https://github.com/<your-org>/OpenRaptor.git
+git clone https://github.com/birdforce14d/OpenRaptor.git
 cd OpenRaptor
 ```
 
@@ -124,7 +124,7 @@ sp01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/sp01-module
 dc01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/dc01-base-specialized/Versions/1.0.0"
 
 # Kali post-deploy setup script (pull from OpenRaptor — public)
-kali_setup_script_url = "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh"
+kali_setup_script_url = "https://raw.githubusercontent.com/birdforce14d/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh"
 
 # Infrastructure
 bastion_sku   = "Standard"
@@ -372,7 +372,7 @@ After all VMs are running, stage the scenario toolkit for Module 01. Run this fr
 ```powershell
 # On DC01 — stage Module 01 toolkit
 # Downloads from OpenRaptor, stages on Kali01, seeds j.chen account
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scripts/lab_01_setup.ps1" -OutFile "C:\lab_01_setup.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/birdforce14d/OpenRaptor/main/scripts/lab_01_setup.ps1" -OutFile "C:\lab_01_setup.ps1"
 .\lab_01_setup.ps1
 ```
 
@@ -485,7 +485,7 @@ Test-NetConnection -ComputerName 10.10.1.10 -Port 389
 
 # Attempt rejoin
 $cred = Get-Credential  # DOMAIN\cirtadmin
-Add-Computer -DomainName "{{DOMAIN}}" -Credential $cred -Force -Restart
+Add-Computer -DomainName "norca.click" -Credential $cred -Force -Restart
 ```
 
 ### Log Analytics not receiving data
@@ -621,10 +621,10 @@ terraform apply -target module.sp01 -auto-approve
 **Step 1 — Attempt recovery first:**
 ```bash
 # Try a restart
-az vm restart -g <YOUR_RESOURCE_GROUP> -n dc01
+az vm restart -g rg-cirtlab-core -n dc01
 
 # Check AD DS service
-az vm run-command invoke -g <YOUR_RESOURCE_GROUP> -n dc01 \
+az vm run-command invoke -g rg-cirtlab-core -n dc01 \
   --command-id RunPowerShellScript \
   --scripts "Get-Service NTDS,DNS,Netlogon | Select Name,Status"
 ```
@@ -647,7 +647,7 @@ terraform apply -target module.sp01 -auto-approve
 
 **Step 3 — Verify AD DS:**
 ```bash
-az vm run-command invoke -g <YOUR_RESOURCE_GROUP> -n dc01 \
+az vm run-command invoke -g rg-cirtlab-core -n dc01 \
   --command-id RunPowerShellScript \
   --scripts "
 Get-Service NTDS,DNS,Netlogon | Select Name,Status
@@ -664,14 +664,14 @@ Kali is deployed from **Azure Marketplace** (not Community Gallery — Marketpla
 
 ```bash
 # Delete the existing Kali VM
-az vm delete --resource-group <YOUR_RESOURCE_GROUP> --name kali01 --yes
+az vm delete --resource-group rg-cirtlab-core --name kali01 --yes
 
 # Accept Marketplace terms (if not already done)
 az vm image terms accept --publisher kali-linux --offer kali-linux --plan kali
 
 # Redeploy from Marketplace
 az vm create \
-  --resource-group <YOUR_RESOURCE_GROUP> \
+  --resource-group rg-cirtlab-core \
   --name kali01 \
   --image "kali-linux:kali:kali-2025-4:latest" \
   --size Standard_D2s_v3 \
@@ -720,7 +720,7 @@ Full rebuild: ~45–60 minutes.
 ## Security Notes
 
 - No VMs have public IP addresses — all access via Bastion only
-- Azure Policy denies public IP creation in `<YOUR_RESOURCE_GROUP>`
+- Azure Policy denies public IP creation in `rg-cirtlab-core`
 - All simulations are **benign** — no real malware, no live exploits
 - Do not connect this lab to production systems
 - Rotate admin credentials after initial setup
@@ -729,7 +729,7 @@ Full rebuild: ~45–60 minutes.
 
 ## Support
 
-For issues, open a GitHub issue at [<your-org>/OpenRaptor](https://github.com/<your-org>/OpenRaptor/issues).
+For issues, open a GitHub issue at [birdforce14d/OpenRaptor](https://github.com/birdforce14d/OpenRaptor/issues).
 
 ---
 
