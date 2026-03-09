@@ -95,235 +95,339 @@ cd OpenRaptor
 
 ## Step 3 — Configure Deployment Variables
 
+Copy the example vars file and fill in your values:
+
 ```bash
-cp infra/base/terraform.tfvars.example infra/base/terraform.tfvars
+cp infra-tf/terraform.tfvars.example infra-tf/terraform.tfvars
 ```
 
-Edit `infra/base/terraform.tfvars`:
+Edit `infra-tf/terraform.tfvars`:
 
 ```hcl
-# Azure credentials
-tenant_id       = "YOUR_TENANT_ID"
+# Target Azure tenant and subscription
 subscription_id = "YOUR_SUBSCRIPTION_ID"
-client_id       = "YOUR_CLIENT_ID"
-client_secret   = "YOUR_CLIENT_SECRET"   # or use env var TF_VAR_client_secret
-
-# Deployment settings
 location        = "australiaeast"        # Change to your preferred region
-prefix          = "cirtlab"             # Resource naming prefix
-domain_name     = "{{DOMAIN}}"          # Your lab AD domain (e.g. lab.contoso.com)
-admin_username  = "cirtadmin"
-admin_password  = "<YOUR_ADMIN_PASSWORD>"  # Min 12 chars, upper+lower+number+symbol
 
-# Cost controls
-auto_shutdown_time = "1900"             # UTC — VMs shut down daily at this time
-ttl_hours          = 72                 # Hours before auto-destroy tag triggers
-budget_alert_usd   = 100               # Monthly spend alert threshold
+# Resource groups (names are customisable)
+rg_network  = "rg-cirtlab-network"
+rg_core     = "rg-cirtlab-core"
+rg_attacker = "rg-cirtlab-attacker"
+rg_policy   = "rg-cirtlab-policy"
+rg_identity = "rg-cirtlab-identity"
 
-# Optional
-deploy_kali        = true
-deploy_mde         = false              # Set true if MDE licensed
+# VM admin credentials
+admin_username = "cirtadmin"
+# admin_password set via environment variable — see below
+
+# Golden image IDs — Community Gallery (provided by OD@CIRT.APAC out-of-band)
+sp01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/sp01-module01-student/Versions/1.0.0"
+dc01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/dc01-base-specialized/Versions/1.0.0"
+
+# Kali post-deploy setup script (pull from OpenRaptor — public)
+kali_setup_script_url = "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh"
+
+# Infrastructure
+bastion_sku   = "Standard"
+dns_zone_name = "norca.click"
+vm_size       = "Standard_D2s_v3"
+
+# SP01 private IP (snet-target-module01 = 10.10.3.0/24)
+sp01_private_ip = "10.10.3.10"
+
+# Tags applied to all resources
+tags = {
+  environment = "lab"
+  module      = "shared"
+  owner       = "cirt"
+  blastRadius = "zero"
+  ttl         = "2026-12-31"
+}
 ```
 
-> ⚠️ **Never commit `terraform.tfvars` to Git.** It's in `.gitignore` by default.
+Set your admin password as an environment variable (do not put it in the vars file):
+
+```bash
+# Bash
+export TF_VAR_admin_password="CirtApacAdm!n2026"
+
+# PowerShell
+$env:TF_VAR_admin_password = "CirtApacAdm!n2026"
+```
+
+> ⚠️ **Never commit `terraform.tfvars` to Git.** It contains your subscription ID and is in `.gitignore` by default.
 
 ---
 
-## Step 4 — Deploy Base Infrastructure
+## Step 4 — Authenticate to Azure
+
+Login with the service principal created in Step 1:
 
 ```bash
-cd infra/base
+# Bash
+az login --service-principal \
+  --username  "$ARM_CLIENT_ID" \
+  --password  "$ARM_CLIENT_SECRET" \
+  --tenant    "$ARM_TENANT_ID"
 
-# Initialise Terraform (downloads providers, sets up state backend)
+# PowerShell
+az login --service-principal `
+  --username  $env:ARM_CLIENT_ID `
+  --password  $env:ARM_CLIENT_SECRET `
+  --tenant    $env:ARM_TENANT_ID
+
+az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
+```
+
+Or log in interactively if you have Owner/Contributor access:
+
+```bash
+az login
+az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
+```
+
+---
+
+## Step 5 — Deploy Infrastructure (Terraform)
+
+All infrastructure is deployed from the single `infra-tf/` directory. One `terraform apply` creates everything: networking, VMs, Bastion, Log Analytics, DNS, and policy.
+
+```bash
+cd infra-tf
+
+# Initialise (downloads providers: azurerm ~>4.0, azapi ~>2.0)
 terraform init
 
-# Preview what will be deployed
+# Preview — review carefully before applying
 terraform plan -out=tfplan
 
-# Review the plan output carefully, then apply
+# Apply — takes approximately 10–20 minutes
 terraform apply tfplan
 ```
 
-Deployment takes approximately **15–20 minutes**.
+Resources created:
 
-Expected resources created:
-- Resource Group `<YOUR_RESOURCE_GROUP>`
-- Virtual Network with 4 subnets (management, target, attack, monitoring)
-- Azure Bastion + Public IP
-- Log Analytics Workspace
-- Network Security Groups
-- Azure Policy assignments (deny public IPs, restrict SKUs)
+| Module | Resources |
+|--------|-----------|
+| `network` | VNet `10.10.0.0/16`, 4 subnets, 4 NSGs |
+| `bastion` | Azure Bastion Standard + Public IP |
+| `logging` | Log Analytics Workspace (`law-cirtlab`) |
+| `dns` | Private DNS zone `norca.click`, A records for DC01 + SP01 |
+| `dc01` | DC01 VM from Community Gallery (`dc01-base-specialized`) at `10.10.1.10` |
+| `sp01` | SP01 VM from Community Gallery (`sp01-module01-student`) at `10.10.3.10` |
+| `kali01` | Kali Linux VM from Azure Marketplace at `10.10.2.10` |
+| `policy` | Tag policy (audit mode) |
+| `scripts-storage` | Storage account for lab scripts |
+
+> ⏳ VM provisioning from golden images takes **5–10 minutes** per VM. Total deployment: **15–25 minutes**.
+
+### Golden Images
+
+| Image | VM | Source | Description |
+|-------|-----|--------|-------------|
+| `dc01-base-specialized` | DC01 | Community Gallery | Windows Server — AD DS, DNS, `norca.click` domain pre-configured |
+| `sp01-module01-student` | SP01 | Community Gallery | SharePoint 2019 — **clean (noWS)**. Use for Module 01 student path |
+| `sp01-module01` | SP01 | Community Gallery | SharePoint 2019 — **webShelled**. Reserved for future walk-in-compromised scenarios |
+| _(Marketplace)_ | Kali01 | Azure Marketplace `kali-linux:kali:kali-2025-4` | Kali Linux — Marketplace terms prevent Community Gallery distribution |
+
+> 📌 Community Gallery name (`<COMMUNITY_GALLERY_NAME>`) is provided by OD@CIRT.APAC directly to authorised deployers. It is not published in this repo.
 
 ---
 
-## Step 5 — Deploy Virtual Machines from Golden Images
+## Step 5 (Alternative) — Manual Deployment via `az vm create`
 
-VMs are deployed from pre-built golden images in the Azure Compute Gallery. This is faster and more reliable than provisioning from scratch.
+If you prefer not to use Terraform, or need to redeploy individual VMs, use `az vm create` directly.
 
-### Available Golden Images
+> **Prerequisites:** VNet, subnets, and NSGs must already exist. Deploy networking with Terraform first (`terraform apply -target module.network`), then use the commands below for VMs.
 
-| Image Definition | VM | Source | Description |
-|---|---|---|---|
-| `dc01-base` | DC01 | Community Gallery | Windows Server with AD DS, DNS, norca.click domain pre-configured |
-| `sp01-module01-student` | SP01 | Community Gallery | SharePoint — **noWS (clean)** — no webshell. Use for Module 01 student path |
-| `sp01-module01` | SP01 | Community Gallery | SharePoint — **webShelled** — pre-compromised. Reserved for future modules |
-| Kali01 | Kali | **Azure Marketplace** | Kali Linux — deployed directly from Marketplace (not Community Gallery) |
-
-> **Community Gallery images (DC01, SP01):** Published by OD@CIRT.APAC. Gallery name provided directly to authorised deployers — contact us to request access.
->
-> **Kali01:** Deployed from Azure Marketplace (`kali-linux` by Kali Linux). Cannot be distributed via Community Gallery due to Marketplace terms.
-
-### Deploy from Images
+### DC01
 
 ```bash
-cd infra/modules/dc01
-terraform init && terraform apply -auto-approve
-
-cd ../sp01
-# Module 01 uses the noWS image — configured in sp01/main.tf
-terraform init && terraform apply -auto-approve
-
-# Kali01 — deploy from Azure Marketplace (not Community Gallery)
+# Bash
 az vm create \
-  --resource-group <YOUR_RESOURCE_GROUP> \
-  --name kali01 \
-  --image "kali-linux:kali:kali-2025-4:latest" \
+  --resource-group rg-cirtlab-core \
+  --name dc01 \
+  --image "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/dc01-base-specialized/Versions/1.0.0" \
   --size Standard_D2s_v3 \
-  --admin-username azureuser \
+  --admin-username cirtadmin \
   --admin-password "<YOUR_ADMIN_PASSWORD>" \
-  --vnet-name vnet-cirtlab \
-  --subnet subnet-kali \
+  --vnet-name vnet-cirtlab-base \
+  --subnet snet-core \
+  --private-ip-address 10.10.1.10 \
   --public-ip-address "" \
-  --nsg kali-nsg \
-  --location <YOUR_REGION>
+  --location australiaeast
 
+# PowerShell
+az vm create `
+  --resource-group rg-cirtlab-core `
+  --name dc01 `
+  --image "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/dc01-base-specialized/Versions/1.0.0" `
+  --size Standard_D2s_v3 `
+  --admin-username cirtadmin `
+  --admin-password "<YOUR_ADMIN_PASSWORD>" `
+  --vnet-name vnet-cirtlab-base `
+  --subnet snet-core `
+  --private-ip-address 10.10.1.10 `
+  --public-ip-address "" `
+  --location australiaeast
+```
+
+### SP01 (Module 01 — noWS image)
+
+```bash
+# Bash
+az vm create \
+  --resource-group rg-cirtlab-core \
+  --name win-norca-sp01 \
+  --image "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/sp01-module01-student/Versions/1.0.0" \
+  --size Standard_D2s_v3 \
+  --admin-username cirtadmin \
+  --admin-password "<YOUR_ADMIN_PASSWORD>" \
+  --vnet-name vnet-cirtlab-base \
+  --subnet snet-target-module01 \
+  --private-ip-address 10.10.3.10 \
+  --public-ip-address "" \
+  --location australiaeast
+
+# PowerShell
+az vm create `
+  --resource-group rg-cirtlab-core `
+  --name win-norca-sp01 `
+  --image "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/sp01-module01-student/Versions/1.0.0" `
+  --size Standard_D2s_v3 `
+  --admin-username cirtadmin `
+  --admin-password "<YOUR_ADMIN_PASSWORD>" `
+  --vnet-name vnet-cirtlab-base `
+  --subnet snet-target-module01 `
+  --private-ip-address 10.10.3.10 `
+  --public-ip-address "" `
+  --location australiaeast
+```
+
+### Kali01 (Marketplace)
+
+```bash
 # Accept Marketplace terms first (one-time per subscription)
 az vm image terms accept \
   --publisher kali-linux \
-  --offer kali-linux \
-  --plan kali
+  --offer kali \
+  --plan kali-2025-4
+
+# Bash
+az vm create \
+  --resource-group rg-cirtlab-attacker \
+  --name kali01 \
+  --image "kali-linux:kali:kali-2025-4:latest" \
+  --size Standard_D2s_v3 \
+  --admin-username cirtadmin \
+  --admin-password "<YOUR_ADMIN_PASSWORD>" \
+  --vnet-name vnet-cirtlab-base \
+  --subnet snet-attacker \
+  --private-ip-address 10.10.2.10 \
+  --public-ip-address "" \
+  --location australiaeast
+
+# PowerShell
+az vm create `
+  --resource-group rg-cirtlab-attacker `
+  --name kali01 `
+  --image "kali-linux:kali:kali-2025-4:latest" `
+  --size Standard_D2s_v3 `
+  --admin-username cirtadmin `
+  --admin-password "<YOUR_ADMIN_PASSWORD>" `
+  --vnet-name vnet-cirtlab-base `
+  --subnet snet-attacker `
+  --private-ip-address 10.10.2.10 `
+  --public-ip-address "" `
+  --location australiaeast
 ```
-
-> ⏳ VM provisioning from golden images takes **5–10 minutes** per VM (significantly faster than full provisioning).
-
-### Configure Community Gallery Reference
-
-In `infra/base/terraform.tfvars`, set the gallery reference:
-
-```hcl
-# Community Gallery — source of golden images
-community_gallery_name = "<COMMUNITY_GALLERY_NAME>"   # Provided by OD@CIRT.APAC — contact us to request access
-image_location         = "australiaeast"               # must match gallery region
-```
-
-> 📌 The community gallery name will be published in the OpenRaptor repo README once images are live.
 
 ---
 
-## Step 6 — Post-Deploy Verification
+## Step 6 — Post-Deploy: SharePoint Service Accounts
 
-Run the smoke test script:
+After DC01 and SP01 are running, verify SharePoint services start correctly. The golden image has `svc-sp-farm` and `svc-sp-app` baked with password `Norca@2024!`.
 
-```bash
-cd ../../..
-bash scripts/smoke-test.sh
+Connect to SP01 via Bastion and run:
+
+```powershell
+# On SP01 — verify SharePoint services are running
+Get-Service | Where-Object { $_.Name -like "SP*" } | Select Name, Status
+
+# If services are stopped, reset service account credentials:
+$svcPass = "Norca@2024!"
+sc.exe config SPTimerV4  obj= "NORCA\svc-sp-farm" password= $svcPass
+sc.exe config SPWriterV4 obj= "NORCA\svc-sp-farm" password= $svcPass
+sc.exe config SPAdminV4  obj= "NORCA\svc-sp-farm" password= $svcPass
+net start SPTimerV4
 ```
 
-Expected output:
-```
-[OK] VNet deployed
-[OK] Bastion reachable
-[OK] DC01 running — norca.click domain active
-[OK] SP01 running — domain joined — HTTP 200
-[OK] Log Analytics receiving heartbeats
-[OK] Entra ID sign-in logs flowing
-[OK] SharePoint audit logs flowing
-```
-
-If any check fails, see **Troubleshooting** below.
+> ⚠️ **`svc-sp-farm` and `svc-sp-app` passwords are permanently `Norca@2024!`** — baked into the golden image. Do not change or rotate these. See [Credential Reference](#credential-reference-canonical).
 
 ---
 
-## Step 6.5 — Lab Module Setup (Kali Toolkit Staging)
+## Step 7 — Lab Module Setup
 
-After deployment, stage the attack toolkit for the active module onto Kali01. This runs from the orchestrator VM and is idempotent — safe to re-run.
+After all VMs are running, stage the scenario toolkit for Module 01. Run this from DC01:
 
-```bash
-# Module 01 — SharePoint Webshell
-bash scripts/lab_01_setup.sh
+```powershell
+# On DC01 — stage Module 01 toolkit
+# Downloads from OpenRaptor, stages on Kali01, seeds j.chen account
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scripts/lab_01_setup.ps1" -OutFile "C:\lab_01_setup.ps1"
+.\lab_01_setup.ps1
 ```
 
 Expected output:
 ```
 [OK] DC01 reachable
-[OK] SP01 reachable
+[OK] SP01 reachable — HTTP 200 on http://sharepoint.norca.click
 [OK] j.chen account created (or already exists)
 [OK] Kali01 toolkit staged at /opt/raptor/lab-01/
 [OK] SP01 in clean state (no webshell present)
 --- Lab 01 setup: READY ---
 ```
 
-> Run this once after initial deployment and again after any full lab rebuild. Not required after SP01-only resets (reset-lab.sh handles SP01 state automatically).
+> Run once after initial deployment. Not required after SP01-only resets (`lab_01_reset.ps1` handles SP01 state automatically).
 
 ---
 
-## Step 7 — Configure Student Access
+## Step 8 — Configure Student Access
 
-> **📦 Managed deployment (OD@CIRT.APAC):** Student accounts, Log Analytics access, and scenario modules are pre-configured as part of the handover. Skip to [Share Bastion Access URL](#share-bastion-access-url) below to share access with your students.
-
-
-### Create Student Accounts in Entra ID
-
-> ℹ️ *Skip this section if OD@CIRT.APAC deployed your lab — student accounts are already created.*
-
+### Create Student Account
 
 ```bash
-# Create a student user
-az ad user create \
-  --display-name "CirtStudent" \
-  --user-principal-name "cirtstudent@norca.click" \
-  --password "<YOUR_STUDENT_PASSWORD>" \
-  --force-change-password-next-sign-in false
+# Azure CLI — create cirtstudent in on-prem AD via DC01 (Bastion session on DC01)
+New-ADUser -Name "cirtstudent" `
+  -UserPrincipalName "cirtstudent@norca.click" `
+  -AccountPassword (ConvertTo-SecureString "CirtApacStudent2026" -AsPlainText -Force) `
+  -PasswordNeverExpires $true `
+  -Enabled $true
 ```
 
 ### Assign Log Analytics Reader Role
 
-> ℹ️ *Skip this section if OD@CIRT.APAC deployed your lab — roles are already assigned.*
-
-
 ```bash
+# Bash
 az role assignment create \
   --assignee "cirtstudent@norca.click" \
   --role "Log Analytics Reader" \
-  --scope /subscriptions/<YOUR_SUBSCRIPTION_ID>/resourceGroups/<YOUR_RESOURCE_GROUP>
+  --scope /subscriptions/<YOUR_SUBSCRIPTION_ID>/resourceGroups/rg-cirtlab-core
+
+# PowerShell
+az role assignment create `
+  --assignee "cirtstudent@norca.click" `
+  --role "Log Analytics Reader" `
+  --scope /subscriptions/<YOUR_SUBSCRIPTION_ID>/resourceGroups/rg-cirtlab-core
 ```
 
-### Share Bastion Access URL
+### Share Bastion Access
 
-Students connect via Bastion:
-1. Azure Portal → Resource Group `<YOUR_RESOURCE_GROUP>`
-2. Select target VM → **Connect** → **Bastion**
-3. Use the credentials provided in your lab handover document
+Students connect via Azure Bastion — no public IPs, no VPN required:
 
-> 💡 You can also create a custom Azure Portal dashboard with direct links to each VM and the Log Analytics Workspace.
+1. Azure Portal → Resource Group `rg-cirtlab-core`
+2. Select `win-norca-sp01` → **Connect** → **Bastion**
+3. Provide credentials from your lab handover document
 
----
-
-## Step 8 — Launch a Scenario Module
-
-```bash
-# Example: Deploy the SharePoint webshell scenario
-cd infra/modules/sp-webshell
-terraform init && terraform apply -auto-approve
-```
-
-Each module auto-tags resources with TTL for cleanup:
-```
-ttl = "72h"
-module = "sp-webshell"
-```
-
----
+> 💡 Pin a Portal dashboard with direct Bastion links to each VM and the Log Analytics Workspace for student convenience.
 
 ## Cost Management
 
@@ -345,12 +449,16 @@ All VMs are configured to shut down at `19:00 UTC` daily. Override in `terraform
 
 ### Destroy the Lab
 ```bash
-# Destroy scenario modules first
-cd infra/modules/sp-webshell && terraform destroy -auto-approve
+cd infra-tf
 
-# Then destroy base infra
-cd infra/base && terraform destroy -auto-approve
+# Bash
+terraform destroy -auto-approve
+
+# PowerShell
+terraform destroy -auto-approve
 ```
+
+> ⚠️ This destroys **all** lab resources — VMs, networking, Bastion, Log Analytics. Golden images in the Community Gallery are **not** deleted (they live in the source subscription). You can redeploy at any time.
 
 ---
 
