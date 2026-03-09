@@ -58,8 +58,8 @@ Save the output — you'll need it in Step 3:
 ## Step 2 — Clone the Repo
 
 ```bash
-git clone https://github.com/<YOUR_ORG>/OpenRaptor.git
-cd cirt-cyber-range
+git clone https://github.com/birdforce14d/raptor.git
+cd raptor
 ```
 
 ---
@@ -127,59 +127,48 @@ Expected resources created:
 
 ---
 
-## Step 5 — Deploy Virtual Machines
+## Step 5 — Deploy Virtual Machines from Golden Images
 
-### DC01 and SP01 (Terraform)
+VMs are deployed from pre-built golden images in the Azure Compute Gallery. This is faster and more reliable than provisioning from scratch.
+
+### Available Golden Images
+
+| Image Definition | VM | Description |
+|---|---|---|
+| `dc01-base` | DC01 | Windows Server with AD DS, DNS, norca.click domain pre-configured |
+| `sp01-module01-student` | SP01 | SharePoint — **noWS (clean)** — no webshell. Use for Module 01 student path |
+| `sp01-module01` | SP01 | SharePoint — **webShelled** — pre-compromised. Reserved for future modules |
+| `kali01-base` | Kali | Kali Linux with full attack toolkit pre-installed at `/opt/raptor/` |
+
+> **Source:** Images are published to the Azure Community Gallery. See your deployment `terraform.tfvars` for the gallery reference.
+
+### Deploy from Images
 
 ```bash
-cd ../modules/dc01
+cd infra/modules/dc01
 terraform init && terraform apply -auto-approve
 
 cd ../sp01
+# Module 01 uses the noWS image — configured in sp01/main.tf
+terraform init && terraform apply -auto-approve
+
+cd ../kali01
 terraform init && terraform apply -auto-approve
 ```
 
-### Kali01 (Azure Marketplace)
+> ⏳ VM provisioning from golden images takes **5–10 minutes** per VM (significantly faster than full provisioning).
 
-Deploy Kali Linux from the Azure Marketplace:
+### Configure Community Gallery Reference
 
-```bash
-# Accept the Marketplace terms for Kali Linux
-az vm image terms accept --publisher kali-linux --offer kali --plan kali-2025-1 --output none
+In `infra/base/terraform.tfvars`, set the gallery reference:
 
-# Deploy Kali VM
-az vm create \
-  --resource-group <RESOURCE_GROUP> \
-  --name kali01 \
-  --image kali-linux:kali:kali-2025-1:latest \
-  --size Standard_D2s_v3 \
-  --vnet-name <VNET_NAME> \
-  --subnet snet-attacker \
-  --private-ip-address 10.10.3.10 \
-  --public-ip-address "" \
-  --admin-username kali \
-  --admin-password "<STUDENT_PASSWORD>" \
-  --nsg "" \
-  --no-wait
+```hcl
+# Community Gallery — source of golden images
+community_gallery_name = "cirtraptorlab-732fa912-74d1-4049-831b-83781b188c49"   # provided by Raptor team
+image_location         = "australiaeast"               # must match gallery region
 ```
 
-> 📝 **Note:** If the Kali plan above is unavailable in your region, list available plans:
-> ```bash
-> az vm image list --publisher kali-linux --all --output table
-> ```
-
-Once Kali01 is running, SSH in via Bastion and run the setup script to stage the attack toolkit:
-
-```bash
-# On Kali01 (via Bastion SSH)
-curl -sL https://raw.githubusercontent.com/birdforce14d/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh | sudo bash
-```
-
-This downloads and stages all Module 01 files to `/opt/raptor/module-01/` — the attack script, student preflight check, and webshell payload.
-
-> ✅ **Verify:** `ls /opt/raptor/module-01/` should show `attack.sh`, `check-lab-01.sh`, and `payloads/help.aspx`.
-
-> ⏳ VM provisioning takes **20–30 minutes** per VM including extensions and domain setup.
+> 📌 The community gallery name will be published in the OpenRaptor repo README once images are live.
 
 ---
 
@@ -325,37 +314,83 @@ Add-Computer -DomainName "{{DOMAIN}}" -Credential $cred -Force -Restart
 
 ---
 
-## Lab Reset — Between Students
+## Lab Administration — Per-Module Scripts
 
-Reset scripts are run from **DC01**. Each module has its own reset script.
+Every module ships **three admin scripts** (run from DC01) and **one student script** (run from Kali01).
 
-### Module 01 — SharePoint Webshell
+### Script Model
 
+| Script | Who | Where | Purpose |
+|--------|-----|--------|---------|
+| `admin/lab_NN_setup.ps1` | Admin | DC01 | First-time setup: create AD accounts, stage toolkit on Kali |
+| `admin/lab_NN_check.ps1` | Admin | DC01 | Pre-flight: verify lab is ready before handing to student |
+| `admin/lab_NN_reset.ps1` | Admin | DC01 | Reset: rebuild VM(s) from golden image between students |
+| `student/check-lab-NN.sh` | Student | Kali01 | Student preflight: confirm environment is ready before starting |
+
+> ⚠️ **All admin scripts run from DC01 as Domain Admin.** Never run reset scripts from the orchestrator VM.
+
+---
+
+### Module 01 — SharePoint Webshell (`lab_01_sp_webshell`)
+
+**Before first student (or after new deployment):**
 ```powershell
-# On DC01, run as Domain Admin
-\\dc01\scripts\lab_01_sp_webshell.ps1
+# On DC01, as Domain Admin
+.\scenarios\module-01-webshell\admin\lab_01_setup.ps1
+```
+Creates j.chen account, stages toolkit on Kali from OpenRaptor.
+
+**Verify lab is ready:**
+```powershell
+.\scenarios\module-01-webshell\admin\lab_01_check.ps1
+```
+Checks DC01, SP01, j.chen auth, Kali toolkit, clean state.
+
+**Reset between students:**
+```powershell
+.\scenarios\module-01-webshell\admin\lab_01_reset.ps1
+```
+Rebuilds SP01 from **`sp01-module01-student` (noWS)** golden image. Reset time: ~10 minutes.
+
+**Student preflight (student runs from Kali01):**
+```bash
+bash /opt/raptor/lab-01/check-lab-01.sh
+```
+All checks must pass (exit 0) before student proceeds.
+
+---
+
+### Golden Image Reference — SP01
+
+| Image | Use case |
+|-------|----------|
+| `sp01-module01-student` | **noWS — Module 01 default.** Student drops webshell themselves from Kali. |
+| `sp01-module01` | **webShelled — future modules.** Investigation starts from already-compromised state. |
+
+> The reset script for Module 01 always rebuilds from `sp01-module01-student`. Never substitute the webShelled image for the student path.
+
+---
+
+### Adding Scripts for New Modules
+
+As new modules are added, follow the same 3+1 pattern:
+
+```
+scenarios/
+└── module-02-bec/
+    ├── admin/
+    │   ├── lab_02_setup.ps1
+    │   ├── lab_02_check.ps1
+    │   └── lab_02_reset.ps1
+    └── student/
+        └── check-lab-02.sh
 ```
 
-**What the script does:**
-1. Rebuilds SP01 from the clean golden image (`sp01-module01/1.0.0`)
-2. Re-runs `seed-domain.ps1` to ensure `j.chen` account exists
-3. Deploys attack toolkit to Kali at `/opt/raptor/module-01/`
-4. Runs a smoke test (SP01 reachable, IIS responding, j.chen can authenticate)
-
-**Reset time:** ~15 minutes.
-
-### Adding New Module Reset Scripts
-
-As new modules are added, create corresponding scripts:
-- `lab_02_bec.ps1` — Module 02 (Business Email Compromise)
-- `lab_03_aitm.ps1` — Module 03 (AiTM Credential Theft)
-- etc.
-
-Each script should:
-1. Rebuild only the VMs affected by that module
-2. Seed any required AD accounts or artifacts
-3. Deploy attack tooling to Kali
-4. Run a smoke test before declaring the lab ready
+Each admin set must:
+1. Seed required AD accounts / M365 data
+2. Stage attack toolkit on Kali from OpenRaptor
+3. Rebuild only VMs affected by that module
+4. Confirm clean state before handing to student
 
 ---
 
@@ -437,13 +472,21 @@ Get-ADUser -Filter * | Measure-Object | Select Count
 
 ### Kali — Emergency Rebuild
 
-Kali has no persistent state. Rebuild is safe at any time.
+Kali is built from the `kali01-base` golden image which includes the full attack toolkit pre-installed at `/opt/raptor/`. Rebuild is safe at any time — no persistent state.
 
 ```bash
 cd infra
 terraform destroy -target module.kali01 -auto-approve
 terraform apply -target module.kali01 -auto-approve
 ```
+
+> After rebuild, run `lab_NN_setup.ps1` for the active module — this re-stages the module-specific toolkit from OpenRaptor to `/opt/raptor/lab-NN/`.
+
+**What the Kali golden image includes:**
+- Kali Linux (latest stable)
+- Pre-installed: `curl`, `nmap`, `impacket`, `crackmapexec`, `evil-winrm`, `responder`
+- `/opt/raptor/` directory structure (module scripts pulled at setup time)
+- Network pre-configured for lab VNet (`10.10.3.x` subnet)
 
 ---
 
@@ -483,8 +526,8 @@ Full rebuild: ~45–60 minutes.
 
 ## Support
 
-For issues, open a GitHub issue at `<YOUR_ORG>/OpenRaptor`.
+For issues, open a GitHub issue at `birdforce14d/raptor`.
 
 ---
 
-_Last updated: 2026-03-08_
+_Last updated: 2026-03-09_
