@@ -77,4 +77,4 @@ Open a [GitHub issue](https://github.com/birdforce14d/OpenRaptor/issues) for que
 
 ---
 
-_OpenRaptor is maintained by CIRT APAC._
+_OpenRaptor is maintained by OD@CIRT.APAC._
