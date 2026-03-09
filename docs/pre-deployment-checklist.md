@@ -311,7 +311,6 @@ OD@CIRT.APAC publishes images to an Azure Community Gallery. The gallery name is
 | `dc01-base` | DC01 | AD DS + DNS, norca.click domain |
 | `sp01-module01-student` | SP01 | Clean SharePoint — noWS (Module 01 default) |
 | `sp01-module01` | SP01 | Pre-compromised SharePoint — webShelled (future modules) |
-| `kali01-base` | Kali01 | Kali with full attack toolkit |
 
 ### 8c — Confirm Image Access
 
@@ -326,7 +325,6 @@ az sig image-definition list-community \
 Expected output:
 ```
 dc01-base
-kali01-base
 sp01-module01
 sp01-module01-student
 ```
