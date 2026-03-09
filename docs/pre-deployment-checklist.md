@@ -219,20 +219,65 @@ Once complete, please confirm:
 
 ---
 
+## 📤 How to Send Us Your Details
+
+> **⚠️ Security Notice:** The information collected above contains sensitive credentials. **Never send these via email or unencrypted chat.**
+
+### Recommended Handover Methods (pick one):
+
+| Method | How |
+|--------|-----|
+| 🔐 **Azure Key Vault** _(preferred)_ | Create a Key Vault in your subscription, store all values as secrets, and grant `sp-cirtlab-deploy` access. Share only the Key Vault name with us. |
+| 🔒 **Encrypted file** | Save all values to a JSON/YAML file, encrypt with GPG or 7-Zip (AES-256), and share via your organisation's secure file transfer. Send the password separately via a different channel. |
+| 🛡️ **Organisation secrets manager** | If your org uses HashiCorp Vault, 1Password Teams, or similar — share via your existing secrets platform and grant us read access. |
+
+### What to include:
+
+```json
+{
+  "subscriptionId": "<YOUR_SUBSCRIPTION_ID>",
+  "tenantId": "<YOUR_TENANT_ID>",
+  "servicePrincipal": {
+    "clientId": "<SP_CLIENT_ID>",
+    "clientSecret": "<SP_CLIENT_SECRET>"
+  },
+  "region": "<YOUR_REGION>",
+  "labConfig": {
+    "organisationName": "<YOUR_ORG_NAME>",
+    "domain": "<YOUR_DOMAIN>",
+    "adminContactEmail": "<YOUR_EMAIL>"
+  },
+  "existingInfra": {
+    "vnetsInUse": [],
+    "resourceGroupsToAvoid": [],
+    "policyRestrictions": ""
+  }
+}
+```
+
+### 📧 Contact
+
+Send the handover to: **OD@CIRT.APAC** via your agreed secure channel.
+
+If you don't have a contact yet, reach out at the email provided during onboarding.
+
+---
+
 ## What Happens Next
 
 Once we receive your completed checklist:
 
-1. We deploy the full lab (~1 hour)
-2. We run automated validation
-3. We send you a handover report with:
-   - Live lab URL
-   - All credentials
-   - Student quickstart guide
-   - Instructor admin guide
-   - Reset procedure
+1. We deploy the full lab into your tenant (~1 hour)
+2. We create student accounts and configure access
+3. We run automated validation
+4. We send you a handover report with:
+   - Bastion access URL
+   - Student credentials
+   - [Student Lab Guide](lab-guide/01-sharepoint-webshell.md)
+   - [Admin Guide](admin-guide.md) (jump to Lab Administration section)
+   - Reset procedure for between students
 
-**Questions?** Contact your CIRT team lead.
+**Questions?** Contact OD@CIRT.APAC via your onboarding channel.
 
 ---
 
