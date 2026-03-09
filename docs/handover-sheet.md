@@ -107,9 +107,9 @@ az policy assignment list --output table
 | Item | Your Value |
 |------|-----------|
 | **Organisation name** _(used in lab scenario)_ | |
-| **Preferred AD domain** _(e.g. `corp.local`, `lab.contoso.com`)_ | |
+| **AD domain** | `norca.click` _(pre-configured, do not change)_ |
 | **Admin contact email** _(for handover report)_ | |
-| **Number of student accounts needed** | |
+| **Number of student accounts** | `1` _(pre-configured)_ |
 
 ---
 
@@ -150,9 +150,9 @@ Copy, fill in, and save as `handover.json`:
   },
   "labConfig": {
     "organisationName": "",
-    "adDomain": "",
+    "adDomain": "norca.click",
     "adminContactEmail": "",
-    "studentAccountCount": 0
+    "studentAccountCount": 1
   },
   "mde": {
     "enabled": false,
