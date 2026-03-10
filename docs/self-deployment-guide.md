@@ -353,6 +353,15 @@ All checks should pass. Your lab is ready.
 
 ## Troubleshooting
 
+### Windows Server Activation Warning
+
+After deployment, Windows Server VMs may show _"Windows isn't activated"_. Fix on each affected VM:
+
+```powershell
+slmgr /skms kms.core.windows.net:1688
+slmgr /ato
+```
+
 ### SharePoint returns HTTP 500 after reboot
 
 Most common cause: IIS app pools lost their credentials. Fix on SP01:

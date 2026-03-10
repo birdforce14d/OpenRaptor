@@ -464,6 +464,18 @@ terraform destroy -auto-approve
 
 ## Troubleshooting
 
+### Windows Server Activation Warning on DC01 or SP01
+
+After deploying from Community Gallery images, you may see a popup: _"Windows isn't activated. Activate Windows now."_ This is cosmetic — the VM is fully functional.
+
+**Fix:**
+```powershell
+slmgr /skms kms.core.windows.net:1688
+slmgr /ato
+```
+
+This points the VM to Azure's KMS server for activation. The warning will disappear after a few minutes. If `slmgr /ato` returns an error, ensure the VM has outbound internet access on port 1688.
+
 ### SP01 SharePoint not responding after reboot
 
 If SP01 becomes unresponsive after a reboot, use the reset script to rebuild from the golden image:
