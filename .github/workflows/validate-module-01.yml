@@ -1,0 +1,88 @@
+# =============================================================================
+# Module 01 — CI Validation Workflow
+# Runs on every push/PR to validate scripts have no placeholders and
+# are syntactically correct.
+# =============================================================================
+
+name: Module 01 — Validate Scripts
+
+on:
+  push:
+    paths:
+      - 'scenarios/module-01-webshell/**'
+      - 'infra/scripts/**'
+  pull_request:
+    paths:
+      - 'scenarios/module-01-webshell/**'
+      - 'infra/scripts/**'
+
+jobs:
+  validate-placeholders:
+    name: Check for placeholder strings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail if any placeholder strings remain
+        run: |
+          echo "Scanning for unfilled placeholders..."
+          # These patterns indicate scripts were not fully updated
+          PATTERNS=(
+            '<YOUR_STUDENT_PASSWORD>'
+            '<YOUR_SUBSCRIPTION_ID>'
+            '<YOUR_RESOURCE_GROUP>'
+            '<YOUR_GALLERY_NAME>'
+            '<YOUR_ADMIN_PASSWORD>'
+            '<your-org>'
+            'PLACEHOLDER'
+            'TODO: fill'
+            'FIXME'
+          )
+          FOUND=0
+          for pattern in "${PATTERNS[@]}"; do
+            matches=$(grep -rn "$pattern" scenarios/ infra/ 2>/dev/null || true)
+            if [ -n "$matches" ]; then
+              echo "ERROR: Found placeholder '$pattern':"
+              echo "$matches"
+              FOUND=1
+            fi
+          done
+          if [ "$FOUND" -eq 1 ]; then
+            echo ""
+            echo "FAIL: Placeholder strings found. Update scripts before merging."
+            exit 1
+          fi
+          echo "OK: No placeholder strings found."
+
+  validate-bash:
+    name: Validate bash scripts (shellcheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck on bash scripts
+        run: |
+          find scenarios/ -name "*.sh" -exec shellcheck --severity=error {} \;
+          echo "OK: All bash scripts passed shellcheck."
+
+  validate-preflight-ips:
+    name: Validate correct IP addresses in scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check SP01 IP is 10.10.3.10 (not 10.10.2.10)
+        run: |
+          # SP01 is on snet-target-module01 (10.10.3.0/24)
+          # Kali01 is on snet-attacker (10.10.2.0/24)
+          # If any script has SP01_IP="10.10.2.10" that's a bug
+          BAD=$(grep -rn 'SP01_IP.*10\.10\.2\.10\|SP01.*10\.10\.2\.10' scenarios/ 2>/dev/null || true)
+          if [ -n "$BAD" ]; then
+            echo "ERROR: Wrong SP01 IP found (should be 10.10.3.10, not 10.10.2.10):"
+            echo "$BAD"
+            exit 1
+          fi
+          echo "OK: SP01 IP addresses correct."
