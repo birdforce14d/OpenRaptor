@@ -271,7 +271,7 @@ az network nic create --resource-group rg-cirtlab-core --name kali01-nic --vnet-
 ```
 
 ```
-az vm create --resource-group rg-cirtlab-core --name kali01 --nics kali01-nic --image kali-linux:kali:kali-2025-4:latest --size Standard_D2s_v3 --admin-username kali --admin-password "Norca@2024!" --os-disk-size-gb 64 --plan-name kali-2025-4 --plan-product kali --plan-publisher kali-linux --no-wait
+az vm create --resource-group rg-cirtlab-core --name kali01 --nics kali01-nic --image kali-linux:kali:kali-2025-4:latest --size Standard_D2s_v3 --admin-username cirtadmin --admin-password "Norca@2024!" --os-disk-size-gb 64 --plan-name kali-2025-4 --plan-product kali --plan-publisher kali-linux --no-wait
 ```
 
 ### Install Attack Toolkit
