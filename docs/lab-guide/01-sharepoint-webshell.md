@@ -66,7 +66,7 @@ SSH into the Kali attack machine via Azure Bastion:
 1. Open the [Azure Portal](https://portal.azure.com)
 2. Navigate to **Resource Group** → `rg-cirtlab-core` → `kali01`
 3. Click **Connect** → **Bastion** → **SSH**
-4. Username: `kali` / Password: *(provided by your instructor)*
+4. Username: `kali` / Password: `Norca@2024!`
 
 **Step 0.2 — Run the Preflight Check**
 

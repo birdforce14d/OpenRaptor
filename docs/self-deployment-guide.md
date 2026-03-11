@@ -141,7 +141,7 @@ az network nic create --resource-group rg-cirtlab-core --name dc01-nic --vnet-na
 ```
 
 ```
-az vm create --resource-group rg-cirtlab-core --name dc01 --nics dc01-nic --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest --size Standard_D2s_v3 --admin-username cirtadmin --admin-password "CirtApacAdm!n2026" --os-disk-size-gb 128 --no-wait
+az vm create --resource-group rg-cirtlab-core --name dc01 --nics dc01-nic --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest --size Standard_D2s_v3 --admin-username cirtadmin --admin-password "Norca@2024!" --os-disk-size-gb 128 --no-wait
 ```
 
 > ⏳ Wait for the VM to be running before continuing.
@@ -158,7 +158,7 @@ Install-WindowsFeature -Name AD-Domain-Services,DNS -IncludeManagementTools
 Install-ADDSForest `
     -DomainName "norca.click" `
     -DomainNetbiosName "NORCA" `
-    -SafeModeAdministratorPassword (ConvertTo-SecureString "CirtApacAdm!n2026" -AsPlainText -Force) `
+    -SafeModeAdministratorPassword (ConvertTo-SecureString "Norca@2024!" -AsPlainText -Force) `
     -InstallDns:$true `
     -Force:$true
 ```
@@ -201,7 +201,7 @@ az network nic create --resource-group rg-cirtlab-core --name sp01-nic --vnet-na
 ```
 
 ```
-az vm create --resource-group rg-cirtlab-core --name sp01 --nics sp01-nic --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest --size Standard_D4s_v3 --admin-username cirtadmin --admin-password "CirtApacAdm!n2026" --os-disk-size-gb 128 --no-wait
+az vm create --resource-group rg-cirtlab-core --name sp01 --nics sp01-nic --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest --size Standard_D4s_v3 --admin-username cirtadmin --admin-password "Norca@2024!" --os-disk-size-gb 128 --no-wait
 ```
 
 ### Configure DNS and Join Domain
@@ -213,7 +213,7 @@ Connect to SP01 via Bastion:
 Set-DnsClientServerAddress -InterfaceAlias "Ethernet*" -ServerAddresses "10.10.1.10"
 
 # Join domain
-$cred = New-Object PSCredential("NORCA\cirtadmin", (ConvertTo-SecureString "CirtApacAdm!n2026" -AsPlainText -Force))
+$cred = New-Object PSCredential("NORCA\cirtadmin", (ConvertTo-SecureString "Norca@2024!" -AsPlainText -Force))
 Add-Computer -DomainName "norca.click" -Credential $cred -Force -Restart
 ```
 
@@ -271,7 +271,7 @@ az network nic create --resource-group rg-cirtlab-core --name kali01-nic --vnet-
 ```
 
 ```
-az vm create --resource-group rg-cirtlab-core --name kali01 --nics kali01-nic --image kali-linux:kali:kali-2025-4:latest --size Standard_D2s_v3 --admin-username kali --admin-password "CirtApacAdm!n2026" --os-disk-size-gb 64 --plan-name kali-2025-4 --plan-product kali --plan-publisher kali-linux --no-wait
+az vm create --resource-group rg-cirtlab-core --name kali01 --nics kali01-nic --image kali-linux:kali:kali-2025-4:latest --size Standard_D2s_v3 --admin-username kali --admin-password "Norca@2024!" --os-disk-size-gb 64 --plan-name kali-2025-4 --plan-product kali --plan-publisher kali-linux --no-wait
 ```
 
 ### Install Attack Toolkit
@@ -342,7 +342,7 @@ All checks should pass. Your lab is ready.
 
 | Account | Password | Purpose |
 |---------|----------|---------|
-| `NORCA\cirtadmin` | `CirtApacAdm!n2026` | Domain Admin, lab administrator |
+| `NORCA\cirtadmin` | `Norca@2024!` | Domain Admin, lab administrator |
 | `NORCA\svc-sp-farm` | `Norca@2024!` | SharePoint farm service account — **dedicated, do not change** |
 | `NORCA\cirtstudent` | `CirtApacStudent2026` | Student login — lab exercises |
 | `NORCA\j.chen` | `CirtApacStudent2026` | Scenario character (compromised Finance analyst) |
