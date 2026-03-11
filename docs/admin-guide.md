@@ -547,6 +547,16 @@ Kali uses SSH (not RDP). Two common blockers:
    ```
    Both fixes are baked into Terraform (`ca9dcf9` / `8d09976`) — only needed if deploying from old state.
 
+3. **`cirtadmin` password not set after fresh deploy** — The Kali community gallery image may boot with a different default password than what Terraform provisioned. Symptom: Bastion SSH shows `authentication failure` for `cirtadmin` in `/var/log/auth.log`. Fix via Azure Run Command:
+   ```bash
+   az vm run-command invoke \
+     --subscription <SUBSCRIPTION_ID> \
+     -g rg-cirtlab-attacker -n kali01 \
+     --command-id RunShellScript \
+     --scripts "echo 'cirtadmin:Norca@2024!' | chpasswd && echo done"
+   ```
+   This is permanently fixed in Terraform from commit `0b63b06` — the CSE now explicitly runs `chpasswd` on every deploy. If you hit this on a deploy from older code, pull latest `main` and re-run `terraform apply`.
+
 #### SP01/DC01 RDP via Bastion fails  
 1. **Wrong account** — use local `cirtadmin` (no domain prefix), not `NORCA\cirtadmin`
 2. **Tag policy blocking password reset** — our `require-lab-tags` policy blocks `VMAccessExtension` and `run-command` resources without tags. The DC01 `reset_passwords` run command now has `tags = var.tags` (`cfee764`). If hitting this on old state, create a temporary policy exemption on the RG, reset, then remove.
