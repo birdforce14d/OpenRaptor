@@ -43,6 +43,14 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 
 > **Do not guess passwords. This table is the system of record. Updated: 2026-03-11**
 
+### Local Accounts (Bastion access — available from first boot)
+
+| Account | Username | Password | Notes |
+|---------|----------|----------|-------|
+| Local admin (all VMs) | `cirtadmin` | `Norca@2024!` | Use this for Bastion RDP/SSH. No domain prefix. |
+
+### Domain Accounts (available after DC01 fully provisioned, ~15-20 min post-deploy)
+
 | Class | Account(s) | Password | Notes |
 |-------|-----------|----------|-------|
 | Domain Admin | `NORCA\cirtadmin`, `NORCA\Administrator` | `Norca@2024!` | Do not share with students |
@@ -50,11 +58,12 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 | Scenario character | `NORCA\j.chen` | `CirtApacStudent2026` | Finance Analyst — compromised in scenario |
 | **Service account** | `NORCA\svc-sp-farm` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
 | **Service account** | `NORCA\svc-sp-app` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
+| **Service account** | `NORCA\svc-sp-search` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
 | Handover encryption | _(7-Zip archive)_ | `CirtAPACR@ptor` | Standard handover zip password |
 
 > ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`, `svc-sp-search`) must use `Norca@2024!` — this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
 
-> ℹ️ **Bastion access:** `cirtadmin` Bastion login is available from first boot. The `adminPassword` is set at VM provisioning time via `osProfile` — no waiting for post-deploy scripts. Password: `Norca@2024!`
+> ℹ️ **Bastion access:** Use **local** `cirtadmin` / `Norca@2024!` — available from first boot on all VMs (set via `osProfile` at provisioning). Do NOT use `NORCA\cirtadmin` for Bastion — the domain account requires DC01 to be fully provisioned first.
 
 
 ## Step 1 — Create a Service Principal

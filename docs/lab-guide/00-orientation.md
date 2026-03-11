@@ -77,8 +77,9 @@ By the end of this module, you will:
 1. Open the Azure Portal → navigate to Resource Group `<RESOURCE_GROUP>`
 2. Find **DC01** → Click **Connect** → Select **Bastion**
 3. Enter credentials:
-   - Username: `cirtadmin`
-   - Password: _(provided separately)_
+   - Username: `cirtadmin` *(local account — no domain prefix)*
+   - Password: `Norca@2024!`
+   > ℹ️ Use the local account for Bastion. Available from first boot on all VMs.
 4. A browser-based RDP session opens
 
 > 💡 **Why Bastion?** No VMs have public IP addresses. Bastion provides secure, audited access without exposing RDP/SSH to the internet.
