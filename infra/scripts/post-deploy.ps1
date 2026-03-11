@@ -14,7 +14,7 @@ function Write-Log {
 }
 
 $AdminUser     = "NORCA\cirtadmin"
-$AdminPassword = "Interface0/1"
+$AdminPassword = "Norca@2024!"
 $Domain        = "norca.click"
 $DcIP          = "10.10.1.10"
 $AppPoolName   = "SharePoint - 80"
@@ -74,6 +74,29 @@ if (Test-Path $Stage2Flag) {
             Start-Sleep 10
         }
     }
+
+
+    # Fix SQL logins (SID mismatch after domain rebuild from golden image)
+    # The golden image has svc-sp-farm/svc-sp-app SQL logins with the original domain SID.
+    # After a fresh DC01 creates a new domain, the SIDs do not match -- must drop and recreate.
+    Write-Log "Fixing SQL logins for SP service accounts (SID re-sync)..."
+    $sqlFile = "C:\\Windows\\Temp\\fix-sp-sql.sql"
+    @"
+IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = N'NORCA\svc-sp-farm') DROP LOGIN [NORCA\svc-sp-farm];
+GO
+CREATE LOGIN [NORCA\svc-sp-farm] FROM WINDOWS;
+GO
+EXEC sp_addsrvrolemember N'NORCA\svc-sp-farm', N'sysadmin';
+GO
+IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = N'NORCA\svc-sp-app') DROP LOGIN [NORCA\svc-sp-app];
+GO
+CREATE LOGIN [NORCA\svc-sp-app] FROM WINDOWS;
+GO
+PRINT 'SQL logins fixed';
+GO
+"@ | Set-Content $sqlFile -Encoding ASCII
+    $sqlOut = sqlcmd -S "localhost\SHAREPOINT" -i $sqlFile -E 2>&1
+    Write-Log "SQL fix result: $($sqlOut -join ' | ')"
 
     # Grant logon rights to app pool identity
     # After sysprep + domain rejoin, machine SID changes and these rights are lost.
