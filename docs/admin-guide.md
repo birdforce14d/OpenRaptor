@@ -41,18 +41,20 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 
 ## Credential Reference (Canonical)
 
-> **Do not guess passwords. This table is the system of record. Updated: 2026-03-09**
+> **Do not guess passwords. This table is the system of record. Updated: 2026-03-11**
 
 | Class | Account(s) | Password | Notes |
 |-------|-----------|----------|-------|
-| Domain Admin | `NORCA\cirtadmin`, `NORCA\Administrator` | `CirtApacAdm!n2026` | Do not share with students |
+| Domain Admin | `NORCA\cirtadmin`, `NORCA\Administrator` | `Norca@2024!` | Do not share with students |
 | Student login | `NORCA\cirtstudent`, `cirtstudent@norca.click` | `CirtApacStudent2026` | Lab login for students |
 | Scenario character | `NORCA\j.chen` | `CirtApacStudent2026` | Finance Analyst — compromised in scenario |
 | **Service account** | `NORCA\svc-sp-farm` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
 | **Service account** | `NORCA\svc-sp-app` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
 | Handover encryption | _(7-Zip archive)_ | `CirtAPACR@ptor` | Standard handover zip password |
 
-> ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`) must use `Norca@2024!` — this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
+> ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`, `svc-sp-search`) must use `Norca@2024!` — this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
+
+> ℹ️ **Bastion access:** `cirtadmin` Bastion login is available from first boot. The `adminPassword` is set at VM provisioning time via `osProfile` — no waiting for post-deploy scripts. Password: `Norca@2024!`
 
 
 ## Step 1 — Create a Service Principal
@@ -148,10 +150,10 @@ Set your admin password as an environment variable (do not put it in the vars fi
 
 ```bash
 # Bash
-export TF_VAR_admin_password="CirtApacAdm!n2026"
+export TF_VAR_admin_password="Norca@2024!"
 
 # PowerShell
-$env:TF_VAR_admin_password = "CirtApacAdm!n2026"
+$env:TF_VAR_admin_password = "Norca@2024!"
 ```
 
 > ⚠️ **Never commit `terraform.tfvars` to Git.** It contains your subscription ID and is in `.gitignore` by default.
