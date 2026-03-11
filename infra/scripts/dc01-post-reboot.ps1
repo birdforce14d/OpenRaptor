@@ -10,10 +10,8 @@ $ErrorActionPreference = "Stop"
 Start-Transcript -Path "C:\dc01-post-reboot.log" -Append -Force
 
 $DomainDN  = "DC=norca,DC=click"
-$svcPassPlain  = if ($env:CIRT_SVC_PASSWORD) { $env:CIRT_SVC_PASSWORD } else { throw "CIRT_SVC_PASSWORD env var not set" }
-$SvcPass   = ConvertTo-SecureString $svcPassPlain -AsPlainText -Force
-$studPassPlain = if ($env:CIRT_STUDENT_PASSWORD) { $env:CIRT_STUDENT_PASSWORD } else { throw "CIRT_STUDENT_PASSWORD env var not set" }
-$StudPass  = ConvertTo-SecureString $studPassPlain -AsPlainText -Force
+$SvcPass   = ConvertTo-SecureString "Norca@2024!" -AsPlainText -Force
+$StudPass  = ConvertTo-SecureString "CirtApacStudent2026" -AsPlainText -Force
 
 Write-Host "[1/6] Creating OUs..."
 $OUs = @("Employees","ServiceAccounts","Computers","Groups")
