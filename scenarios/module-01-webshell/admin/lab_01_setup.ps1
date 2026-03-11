@@ -34,10 +34,7 @@ Write-Host "║  Run as: Farm Admin on SP01 (or DC01 for AD) ║" -ForegroundCol
 Write-Host "╚══════════════════════════════════════════════╝" -ForegroundColor Yellow
 Write-Host ""
 
-$studentPassPlain = $env:CIRT_STUDENT_PASSWORD
-# CIRT_STUDENT_PASSWORD env var must be set before running this script (see team/DECISIONS.md for value)
-if (-not $studentPassPlain) { throw "CIRT_STUDENT_PASSWORD env var not set. Aborting." }
-$password = ConvertTo-SecureString $studentPassPlain -AsPlainText -Force
+$password = ConvertTo-SecureString "CirtApacStudent2026" -AsPlainText -Force
 
 # =============================================================================
 # STEP 1 + 2: AD Account Setup (requires AD module — run on DC01 or SP01)
