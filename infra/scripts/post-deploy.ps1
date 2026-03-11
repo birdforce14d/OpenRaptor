@@ -83,7 +83,7 @@ if (Test-Path $Stage2Flag) {
     # then use that to recreate the SP logins with the current domain SIDs.
     Write-Log "Fixing SQL logins via single-user mode recovery..."
     $sqlInstance = "MSSQL`$SHAREPOINT"
-    $regPath = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL13.SHAREPOINT\MSSQLServer\Parameters"
+    $regPath = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL15.SHAREPOINT\MSSQLServer\Parameters"
     try {
         # Add -m startup param
         $existing = (Get-ItemProperty $regPath -ErrorAction Stop).PSObject.Properties | Where-Object { $_.Name -like "SQLArg*" }
