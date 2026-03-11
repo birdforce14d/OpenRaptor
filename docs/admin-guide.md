@@ -530,6 +530,27 @@ Add-Computer -DomainName "norca.click" -Credential $cred -Force -Restart
 - Verify Bastion is in `AzureBastionSubnet` (exact name required)
 - Check NSG on Bastion subnet allows inbound 443 from Internet
 - Confirm VM is running (not deallocated)
+- **Always use local `cirtadmin` account (no domain prefix) — not `NORCA\cirtadmin`**
+- Students use `cirtstudent@norca.click` (domain) — only works after seed script has run
+
+#### Kali01 SSH via Bastion fails
+Kali uses SSH (not RDP). Two common blockers:
+
+1. **`PasswordAuthentication no`** — cloud-init drops `/etc/ssh/sshd_config.d/50-cloud-init.conf` overriding `sshd_config`. Fix:
+   ```bash
+   sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config.d/50-cloud-init.conf
+   systemctl restart ssh
+   ```
+2. **Missing Bastion inbound NSG rule** — `nsg-attacker` must allow inbound TCP 22 from `AzureBastionSubnet` (`10.10.0.0/26`). Check with:
+   ```bash
+   az network nsg rule list -g rg-cirtlab-network --nsg-name nsg-attacker --query "[?direction=='Inbound']" -o table
+   ```
+   Both fixes are baked into Terraform (`ca9dcf9` / `8d09976`) — only needed if deploying from old state.
+
+#### SP01/DC01 RDP via Bastion fails  
+1. **Wrong account** — use local `cirtadmin` (no domain prefix), not `NORCA\cirtadmin`
+2. **Tag policy blocking password reset** — our `require-lab-tags` policy blocks `VMAccessExtension` and `run-command` resources without tags. The DC01 `reset_passwords` run command now has `tags = var.tags` (`cfee764`). If hitting this on old state, create a temporary policy exemption on the RG, reset, then remove.
+3. **NSG missing Bastion rule** — `nsg-target` must allow inbound TCP 3389 from `10.10.0.0/26`
 
 ---
 

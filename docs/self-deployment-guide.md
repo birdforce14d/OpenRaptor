@@ -391,6 +391,25 @@ Set-DnsClientServerAddress -InterfaceAlias "Ethernet*" -ServerAddresses "10.10.1
 Test-NetConnection -ComputerName 10.10.1.10 -Port 389
 ```
 
+### Bastion SSH to Kali01 fails
+
+Two cloud-init issues affect Kali01:
+
+1. **`PasswordAuthentication no`** in `/etc/ssh/sshd_config.d/50-cloud-init.conf` overrides `sshd_config`. Fix remotely via Run Command:
+   ```bash
+   sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config.d/50-cloud-init.conf
+   systemctl restart ssh
+   ```
+2. **`nsg-attacker` missing inbound Bastion rule** — add Allow TCP 22 from `10.10.0.0/26` at priority 110.
+
+Both are automated in Terraform as of `ca9dcf9` and `8d09976`. Manual fix only needed for deployments from older IaC.
+
+### Bastion RDP to SP01/DC01 fails
+
+- Use local `cirtadmin` (no `NORCA\` prefix) — domain account won't work until DC01 is fully provisioned
+- If `az vm user update` or run-command is blocked by policy: create a temporary policy exemption on the resource group, reset password via `net user cirtadmin "Norca@2024!"`, then remove exemption
+- Check `nsg-target` has Allow TCP 3389 inbound from `10.10.0.0/26`
+
 ### Kali cannot reach other VMs
 
 Check NSG rules allow ICMP and verify subnet-NSG associations.
@@ -400,7 +419,7 @@ Check NSG rules allow ICMP and verify subnet-NSG associations.
 ## Next Steps
 
 1. **Start Module 01** — [SharePoint Webshell Detection Lab Guide](lab-guide/01-sharepoint-webshell.md)
-2. **Student access** — students RDP via Bastion as `NORCA\cirtstudent` / `CirtApacStudent2026`
+2. **Student access** — students use Bastion as `cirtstudent@norca.click` / `CirtApacStudent2026` (domain account, after seed script)
 3. **Reset between students** — run `lab_01_reset.ps1` from DC01 (see [Admin Guide](admin-guide.md))
 
 ---
