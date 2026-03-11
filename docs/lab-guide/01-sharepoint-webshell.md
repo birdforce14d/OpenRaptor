@@ -122,8 +122,7 @@ cd /opt/raptor/module-01
 RDP into `win-norca-sp01` via Azure Bastion:
 1. Azure Portal → `rg-cirtlab-core` → `win-norca-sp01`
 2. Click **Connect** → **Bastion** → **RDP**
-3. Username: `cirtadmin` / Password: `Norca@2024!`
-   > ℹ️ Use the local account (no domain prefix) for Bastion access.
+3. Username: `cirtstudent@norca.click` / Password: `CirtApacStudent2026`
 
 **Step 1.2 — Access the Suspicious File via Browser**
 

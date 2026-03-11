@@ -32,7 +32,9 @@ Go to [portal.azure.com](https://portal.azure.com) and sign in with your provide
 ### 3. Connect to a VM via Bastion
 1. Click on a VM (e.g. `dc01` or `win-norca-sp01`)
 2. Click **Connect** → **Bastion**
-3. Enter the VM credentials provided by your instructor
+3. Enter your credentials:
+   - Username: `cirtstudent@norca.click`
+   - Password: `CirtApacStudent2026`
 4. A browser-based desktop session opens — no VPN, no RDP client needed
 
 ### 4. Access Log Analytics

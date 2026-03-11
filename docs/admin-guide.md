@@ -45,21 +45,31 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 
 ### Local Accounts (Bastion access — available from first boot)
 
+> Use local accounts for Bastion RDP/SSH immediately after deploy. No domain prefix required.
+
 | Account | Username | Password | Notes |
 |---------|----------|----------|-------|
-| Local admin (all VMs) | `cirtadmin` | `Norca@2024!` | Use this for Bastion RDP/SSH. No domain prefix. |
+| Local admin (all VMs) | `cirtadmin` | `Norca@2024!` | Admin Bastion access. Available from first boot. |
 
 ### Domain Accounts (available after DC01 fully provisioned, ~15-20 min post-deploy)
 
+> Students always use domain accounts — by handover time DC01 is fully up.
+
 | Class | Account(s) | Password | Notes |
 |-------|-----------|----------|-------|
-| Domain Admin | `NORCA\cirtadmin`, `NORCA\Administrator` | `Norca@2024!` | Do not share with students |
-| Student login | `NORCA\cirtstudent`, `cirtstudent@norca.click` | `CirtApacStudent2026` | Lab login for students |
+| Domain Admin | `NORCA\cirtadmin`, `NORCA\Administrator` | `Norca@2024!` | Admin use only — do not share with students |
+| **Student Bastion login** | `cirtstudent@norca.click` | `CirtApacStudent2026` | Domain account — students use this for Bastion RDP/SSH |
 | Scenario character | `NORCA\j.chen` | `CirtApacStudent2026` | Finance Analyst — compromised in scenario |
 | **Service account** | `NORCA\svc-sp-farm` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
 | **Service account** | `NORCA\svc-sp-app` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
 | **Service account** | `NORCA\svc-sp-search` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
 | Handover encryption | _(7-Zip archive)_ | `CirtAPACR@ptor` | Standard handover zip password |
+
+> #### Bastion Account Summary
+> | Who | Account | Password | When works |
+> |-----|---------|----------|------------|
+> | 🔧 Admin | `cirtadmin` (local, no prefix) | `Norca@2024!` | First boot onwards |
+> | 🎓 Student | `cirtstudent@norca.click` (domain) | `CirtApacStudent2026` | After DC01 provisioned + seed script run |
 
 > ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`, `svc-sp-search`) must use `Norca@2024!` — this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
 
