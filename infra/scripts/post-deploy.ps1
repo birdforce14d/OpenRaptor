@@ -77,26 +77,66 @@ if (Test-Path $Stage2Flag) {
 
 
     # Fix SQL logins (SID mismatch after domain rebuild from golden image)
-    # The golden image has svc-sp-farm/svc-sp-app SQL logins with the original domain SID.
-    # After a fresh DC01 creates a new domain, the SIDs do not match -- must drop and recreate.
-    Write-Log "Fixing SQL logins for SP service accounts (SID re-sync)..."
-    $sqlFile = "C:\\Windows\\Temp\\fix-sp-sql.sql"
-    @"
+    # The golden image SQL has svc-sp-farm/svc-sp-app logins with the original domain SID.
+    # After fresh DC01, those SIDs don't exist -- and cirtadmin has no SQL perms either.
+    # Solution: restart SQL in single-user mode (-m), which grants local admin sysadmin,
+    # then use that to recreate the SP logins with the current domain SIDs.
+    Write-Log "Fixing SQL logins via single-user mode recovery..."
+    $sqlInstance = "MSSQL`$SHAREPOINT"
+    $regPath = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL13.SHAREPOINT\MSSQLServer\Parameters"
+    try {
+        # Add -m startup param
+        $existing = (Get-ItemProperty $regPath -ErrorAction Stop).PSObject.Properties | Where-Object { $_.Name -like "SQLArg*" }
+        $nextIdx = ($existing | ForEach-Object { [int]($_.Name -replace 'SQLArg','') } | Measure-Object -Maximum).Maximum + 1
+        New-ItemProperty -Path $regPath -Name "SQLArg$nextIdx" -Value "-m" -PropertyType String -Force | Out-Null
+        Write-Log "  Added -m as SQLArg$nextIdx"
+
+        # Restart SQL in single-user mode
+        Restart-Service $sqlInstance -Force
+        Start-Sleep 10
+        Write-Log "  SQL in single-user mode"
+
+        # Grant sysadmin to local cirtadmin
+        $grantSql = "C:\Windows\Temp\grant-sysadmin.sql"
+        @"
+IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = N'win-norca-sp01\cirtadmin')
+    CREATE LOGIN [win-norca-sp01\cirtadmin] FROM WINDOWS;
+GO
+ALTER SERVER ROLE sysadmin ADD MEMBER [win-norca-sp01\cirtadmin];
+GO
+PRINT 'sysadmin granted';
+GO
+"@ | Set-Content $grantSql -Encoding ASCII
+        $gOut = sqlcmd -S "localhost\SHAREPOINT" -i $grantSql 2>&1
+        Write-Log "  Grant result: $($gOut -join ' | ')"
+
+        # Remove -m and restart normally
+        Remove-ItemProperty -Path $regPath -Name "SQLArg$nextIdx" -Force
+        Restart-Service $sqlInstance -Force
+        Start-Sleep 10
+        Write-Log "  SQL back in multi-user mode"
+
+        # Now recreate SP logins with correct current-domain SIDs
+        $fixSql = "C:\Windows\Temp\fix-sp-sql.sql"
+        @"
 IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = N'NORCA\svc-sp-farm') DROP LOGIN [NORCA\svc-sp-farm];
 GO
 CREATE LOGIN [NORCA\svc-sp-farm] FROM WINDOWS;
 GO
-EXEC sp_addsrvrolemember N'NORCA\svc-sp-farm', N'sysadmin';
+ALTER SERVER ROLE sysadmin ADD MEMBER [NORCA\svc-sp-farm];
 GO
 IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = N'NORCA\svc-sp-app') DROP LOGIN [NORCA\svc-sp-app];
 GO
 CREATE LOGIN [NORCA\svc-sp-app] FROM WINDOWS;
 GO
-PRINT 'SQL logins fixed';
+SELECT name, is_disabled FROM sys.server_principals WHERE name LIKE N'NORCA%' ORDER BY name;
 GO
-"@ | Set-Content $sqlFile -Encoding ASCII
-    $sqlOut = sqlcmd -S "localhost\SHAREPOINT" -i $sqlFile -E 2>&1
-    Write-Log "SQL fix result: $($sqlOut -join ' | ')"
+"@ | Set-Content $fixSql -Encoding ASCII
+        $fixOut = sqlcmd -S "localhost\SHAREPOINT" -E -i $fixSql 2>&1
+        Write-Log "  SP logins fixed: $($fixOut -join ' | ')"
+    } catch {
+        Write-Log "  WARNING: SQL login fix failed: $($_.Exception.Message)"
+    }
 
     # Grant logon rights to app pool identity
     # After sysprep + domain rejoin, machine SID changes and these rights are lost.
