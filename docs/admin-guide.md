@@ -576,23 +576,28 @@ Every module ships **three admin scripts** (run from DC01) and **one student scr
 ### Module 01 — SharePoint Webshell (`lab_01_sp_webshell`)
 
 **Before first student (or after new deployment):**
+
+1. Bastion into **DC01** — `cirtadmin` / `Norca@2024!`
+2. Open PowerShell as Administrator
+3. Download and run setup script:
 ```powershell
-# On DC01, as Domain Admin
-.\scenarios\module-01-webshell\admin\lab_01_setup.ps1
+# Download from raptor-infra repo
+$url = "https://raw.githubusercontent.com/birdforce14d/raptor-infra/main/scripts/lab_01_setup.ps1"
+Invoke-WebRequest $url -OutFile C:\lab_01_setup.ps1
+Set-ExecutionPolicy Bypass -Scope Process -Force
+C:\lab_01_setup.ps1
 ```
-Creates j.chen account, stages toolkit on Kali from OpenRaptor.
+Creates AD accounts (`j.chen`, `cirtstudent`), grants student RBAC, verifies DNS, configures SP01 IIS, creates SharePoint document libraries.
 
 **Verify lab is ready:**
 ```powershell
-.\scenarios\module-01-webshell\admin\lab_01_check.ps1
+$url = "https://raw.githubusercontent.com/birdforce14d/raptor-infra/main/scripts/validate-lab.sh"
+# Run from Kali01 via SSH:
+# bash <(curl -s $url)
 ```
-Checks DC01, SP01, j.chen auth, Kali toolkit, clean state.
 
 **Reset between students:**
-```powershell
-.\scenarios\module-01-webshell\admin\lab_01_reset.ps1
-```
-Rebuilds SP01 from **`sp01-module01-student` (noWS)** golden image. Reset time: ~10 minutes.
+> `lab_01_reset.ps1` — not yet implemented. Current process: re-run `lab_01_setup.ps1` to restore clean state.
 
 **Student preflight (student runs from Kali01):**
 ```bash
