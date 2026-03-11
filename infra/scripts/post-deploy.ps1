@@ -14,7 +14,7 @@ function Write-Log {
 }
 
 $AdminUser     = "NORCA\cirtadmin"
-$AdminPassword = "Norca@2024!"
+$AdminPassword = "CirtApacAdm!n2026"
 $Domain        = "norca.click"
 $DcIP          = "10.10.1.10"
 $AppPoolName   = "SharePoint - 80"
