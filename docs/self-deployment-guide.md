@@ -31,10 +31,10 @@ If OD@CIRT.APAC has deployed your lab, **you don't need this guide** — see the
 
 | Subnet | CIDR | Purpose | VMs |
 |--------|------|---------|-----|
-| snet-identity | 10.10.1.0/24 | Domain services | DC01 (10.10.1.10) |
-| snet-servers | 10.10.2.0/24 | Application servers | SP01 (10.10.2.10) |
-| snet-attacker | 10.10.3.0/24 | Attack simulation | Kali01 (10.10.3.10) |
-| AzureBastionSubnet | 10.10.4.0/26 | Bastion ingress | Azure Bastion |
+| snet-core | 10.10.1.0/24 | Domain services | DC01 (10.10.1.10) |
+| snet-target-module01 | 10.10.3.0/24 | Application servers | SP01 (10.10.3.10) |
+| snet-attacker | 10.10.2.0/24 | Attack simulation | Kali01 (10.10.2.10) |
+| AzureBastionSubnet | 10.10.0.0/26 | Bastion ingress | Azure Bastion |
 
 > ⚠️ **No VMs have public IP addresses.** All access is via Azure Bastion only.
 
@@ -51,15 +51,15 @@ az network vnet create --resource-group rg-cirtlab-core --name vnet-cirtlab --ad
 ```
 
 ```
-az network vnet subnet create --resource-group rg-cirtlab-core --vnet-name vnet-cirtlab --name snet-identity --address-prefix 10.10.1.0/24
+az network vnet subnet create --resource-group rg-cirtlab-core --vnet-name vnet-cirtlab --name snet-core --address-prefix 10.10.1.0/24
 ```
 
 ```
-az network vnet subnet create --resource-group rg-cirtlab-core --vnet-name vnet-cirtlab --name snet-servers --address-prefix 10.10.2.0/24
+az network vnet subnet create --resource-group rg-cirtlab-core --vnet-name vnet-cirtlab --name snet-target-module01 --address-prefix 10.10.3.0/24
 ```
 
 ```
-az network vnet subnet create --resource-group rg-cirtlab-core --vnet-name vnet-cirtlab --name snet-attacker --address-prefix 10.10.3.0/24
+az network vnet subnet create --resource-group rg-cirtlab-core --vnet-name vnet-cirtlab --name snet-attacker --address-prefix 10.10.2.0/24
 ```
 
 ```
@@ -197,7 +197,7 @@ Add-DnsServerResourceRecordA -ZoneName "norca.click" -Name "sharepoint" -IPv4Add
 ### Create the VM
 
 ```
-az network nic create --resource-group rg-cirtlab-core --name sp01-nic --vnet-name vnet-cirtlab --subnet snet-servers --private-ip-address 10.10.2.10 --network-security-group nsg-servers
+az network nic create --resource-group rg-cirtlab-core --name sp01-nic --vnet-name vnet-cirtlab --subnet snet-target-module01 --private-ip-address 10.10.3.10 --network-security-group nsg-target
 ```
 
 ```
@@ -267,7 +267,7 @@ az vm image terms accept --publisher kali-linux --offer kali --plan kali-2025-4
 ### Create the VM
 
 ```
-az network nic create --resource-group rg-cirtlab-core --name kali01-nic --vnet-name vnet-cirtlab --subnet snet-attacker --private-ip-address 10.10.3.10 --network-security-group nsg-attacker
+az network nic create --resource-group rg-cirtlab-core --name kali01-nic --vnet-name vnet-cirtlab --subnet snet-attacker --private-ip-address 10.10.2.10 --network-security-group nsg-attacker
 ```
 
 ```

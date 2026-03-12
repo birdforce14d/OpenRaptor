@@ -103,7 +103,7 @@ cd /opt/raptor/module-01
 >
 > The script will show you each step as it runs. Watch the output — in a real incident, this is what the attacker did before you got the call.
 
-> ✅ **Expected:** The script completes with `[✓] Attack simulation complete`. If it fails, check that SP01 is running and reachable from Kali (`ping 10.10.2.10`).
+> ✅ **Expected:** The script completes with `[✓] Attack simulation complete`. If it fails, check that SP01 is running and reachable from Kali (`ping 10.10.3.10`).
 
 > ⏱️ **Wait 2-3 minutes** after the script completes. This allows Windows Event Logs and IIS logs to flush and be available for your investigation.
 

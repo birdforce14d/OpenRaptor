@@ -235,7 +235,7 @@ Resources created:
 | `dns` | Private DNS zone `norca.click`, A records for DC01 + SP01 |
 | `dc01` | DC01 VM from Community Gallery (`dc01-base-specialized`) at `10.10.1.10` |
 | `sp01` | SP01 VM from Community Gallery (`sp01-module01-student`) at `10.10.3.10` |
-| `kali01` | Kali Linux VM from Azure Marketplace at `10.10.3.10` |
+| `kali01` | Kali Linux VM from Azure Marketplace at `10.10.2.10` |
 | `policy` | Tag policy (audit mode) |
 | `scripts-storage` | Storage account for lab scripts |
 
@@ -758,7 +758,7 @@ az vm create \
 - Installs: `curl`, `nmap`, `impacket`, `crackmapexec`, `evil-winrm`, `responder`
 - Creates `/opt/raptor/` directory structure
 - Pulls module scripts from OpenRaptor
-- Network pre-configured for lab VNet (`10.10.3.x` subnet)
+- Network pre-configured for lab VNet (`10.10.2.x` subnet)
 
 ---
 
