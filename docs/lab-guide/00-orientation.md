@@ -27,38 +27,38 @@ By the end of this module, you will:
 ### Network Architecture
 
 ```
-┌─────────────────────────────────────────────────┐
-│              VNet: norca.click-vnet              │
-│                  10.10.0.0/16                    │
-│                                                 │
-│  ┌──────────────┐  ┌──────────────┐            │
-│  │  Management  │  │   Target     │            │
-│  │  Subnet      │  │   Subnet     │            │
-│  │  10.10.1.0/24 │  │  10.10.2.0/24 │            │
-│  │              │  │              │            │
-│  │  • Bastion   │  │  • DC01      │            │
-│  │  • Kali      │  │  • WS01 *   │            │
-│  └──────────────┘  └──────────────┘            │
-│                                                 │
-│  ┌──────────────┐  ┌──────────────┐            │
-│  │   Attack     │  │  Monitoring  │            │
-│  │   Subnet     │  │  Subnet      │            │
-│  │  10.10.3.0/24 │  │  10.10.4.0/24 │            │
-│  │              │  │              │            │
-│  │  (modules)   │  │  • LAW       │            │
-│  └──────────────┘  └──────────────┘            │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│              VNet: vnet-cirtlab-core                │
+│                  10.10.0.0/16                       │
+│                                                     │
+│  ┌────────────────────┐  ┌────────────────────┐    │
+│  │  AzureBastionSubnet│  │  snet-core         │    │
+│  │  10.10.0.0/26      │  │  10.10.1.0/24      │    │
+│  │                    │  │                    │    │
+│  │  • Azure Bastion   │  │  • DC01 10.10.1.10 │    │
+│  │    (entry point)   │  │    (norca.click AD)│    │
+│  └────────────────────┘  └────────────────────┘    │
+│                                                     │
+│  ┌────────────────────┐  ┌────────────────────┐    │
+│  │  snet-attacker     │  │  snet-target-       │    │
+│  │  10.10.2.0/24      │  │  module01           │    │
+│  │                    │  │  10.10.3.0/24       │    │
+│  │  • Kali01 .10      │  │                    │    │
+│  │    (attack box)    │  │  • SP01 10.10.3.10 │    │
+│  └────────────────────┘  │    (SharePoint)    │    │
+│                           └────────────────────┘    │
+└─────────────────────────────────────────────────────┘
 ```
 
 ### Key Resources
 
-| Resource | Purpose | Location |
-|---|---|---|
-| Azure Bastion | Sole entry point to all VMs (no public IPs) | Management Subnet |
-| DC01 | Domain Controller, Active Directory DS | Target Subnet |
-| Kali | Attack simulation box | Management Subnet |
-| WS01 | Domain-joined Windows workstation *(future modules)* | Target Subnet |
-| Log Analytics Workspace | Central telemetry collection | Monitoring Subnet |
+| Resource | IP | Purpose | Subnet |
+|---|---|---|---|
+| Azure Bastion | 4.197.157.80 (public) | Sole entry point — no VMs have public IPs | AzureBastionSubnet (10.10.0.0/26) |
+| DC01 | 10.10.1.10 | Domain Controller, norca.click AD | snet-core (10.10.1.0/24) |
+| Kali01 | 10.10.2.10 | Attack simulation box | snet-attacker (10.10.2.0/24) |
+| SP01 (win-norca-sp01) | 10.10.3.10 | SharePoint 2019 — Module 01 target | snet-target-module01 (10.10.3.0/24) |
+| Log Analytics Workspace | — | Central telemetry collection | N/A |
 
 ### Log Sources
 
@@ -74,7 +74,7 @@ By the end of this module, you will:
 
 ### Step 1 — Connect via Bastion
 
-1. Open the Azure Portal → navigate to Resource Group `<RESOURCE_GROUP>`
+1. Open the Azure Portal → navigate to Resource Group `rg-cirtlab-core`
 2. Find **DC01** → Click **Connect** → Select **Bastion**
 3. Enter credentials:
    - Username: `cirtstudent@norca.click`
@@ -88,10 +88,10 @@ By the end of this module, you will:
 
 1. On DC01, open **Server Manager** → **Tools** → **Active Directory Users and Computers**
 2. Browse the OU structure:
-   - `norca.click/Users` — standard user accounts
-   - `norca.click/Admins` — privileged accounts
-   - `norca.click/ServiceAccounts` — service principals
-   - `norca.click/Workstations` — computer objects
+   - `norca.click/Employees` — student accounts (cirtstudent, j.chen) and employee accounts
+   - `norca.click/ServiceAccounts` — service accounts (svc-sp-farm, svc-sp-app, svc-sp-search)
+   - `norca.click/Computers` — computer objects
+   - `norca.click/Domain Controllers` — DC01
 3. Note the naming conventions and group memberships
 
 ### Step 3 — Access Log Analytics Workspace
@@ -141,13 +141,17 @@ AzureActivity
 2. Verify connectivity:
    ```bash
    # Can you reach the DC?
-   ping 10.10.2.10
-   
+   ping -c 2 10.10.1.10 && echo "DC01 OK"
+
+   # Can you reach the SharePoint target?
+   ping -c 2 10.10.3.10 && echo "SP01 OK"
+   curl -s -o /dev/null -w "SP01 HTTP=%{http_code}\n" http://sharepoint.norca.click
+
    # Scan the target subnet
-   nmap -sn 10.10.2.0/24
-   
+   nmap -sn 10.10.3.0/24
+
    # Check available tools
-   which nmap gobuster hashcat john hydra
+   which nmap gobuster hashcat john hydra curl
    ```
 3. Note which subnets can talk to which — this matters for scenario modules
 

@@ -20,9 +20,9 @@ You do **not** need to install anything.
 ## How to Access the Lab
 
 ### 1. Sign in to Azure Portal
-Go to [portal.azure.com](https://portal.azure.com) and sign in with your provided credentials:
-- Username: `cirtstudent@norca.click` (e.g. cirtstudent@norca.click)
-- Password: _(provided by your instructor)_
+Go to [portal.azure.com](https://portal.azure.com) and sign in with your **Azure/Entra credentials** — provided by your instructor.
+
+> ℹ️ Your Azure login is separate from your lab (AD) credentials. Your instructor will provide your Azure username (typically your work or training account). The on-prem lab account `cirtstudent@norca.click` is used to log in to VMs via Bastion, not to the Azure Portal itself.
 
 ### 2. Navigate to the Lab Environment
 1. In the Azure Portal search bar, type **Resource Groups**
@@ -35,6 +35,7 @@ Go to [portal.azure.com](https://portal.azure.com) and sign in with your provide
 3. Enter your credentials:
    - Username: `cirtstudent@norca.click`
    - Password: `CirtApacStudent2026`
+   > ℹ️ Use the domain account format `cirtstudent@norca.click` for DC01 and SP01. For **Kali01** (SSH), use `cirtadmin` / `Norca@2024!` — Kali is not domain-joined.
 4. A browser-based desktop session opens — no VPN, no RDP client needed
 
 ### 4. Access Log Analytics
