@@ -16,7 +16,7 @@ $StudPass  = ConvertTo-SecureString "CirtApacStudent2026" -AsPlainText -Force
 Write-Host "[1/6] Creating OUs..."
 $OUs = @("Employees","ServiceAccounts","Computers","Groups")
 foreach ($ou in $OUs) {
-    try { New-ADOrganizationalUnit -Name $ou -Path $DomainDN -ProtectedFromAccidentalDeletion $false } catch { Write-Host "OU $ou already exists" }
+    try { New-ADOrganizationalUnit -Name $ou -Path $DomainDN -ProtectedFromAccidentalDeletion $false } catch { Write-Host ("OU ${ou} already exists") }
 }
 
 Write-Host "[2/6] Creating service accounts..."
@@ -34,7 +34,7 @@ foreach ($acct in $SvcAccounts) {
             -PasswordNeverExpires $true `
             -Enabled $true `
             -Path "OU=$($acct.OU),$DomainDN"
-    } catch { Write-Host "Service account $($acct.Name) already exists" }
+    } catch { Write-Host ("Service account " + $acct.Name + " already exists") }
 }
 
 Write-Host "[3/6] Creating student/scenario accounts..."
@@ -52,7 +52,7 @@ foreach ($s in $Students) {
             -PasswordNeverExpires $true `
             -Enabled $true `
             -Path "OU=Employees,$DomainDN"
-    } catch { Write-Host "User $($s.Name) already exists" }
+    } catch { Write-Host ("User " + $s.Name + " already exists") }
 }
 
 Write-Host "[4/6] Creating employee background accounts..."
@@ -79,7 +79,7 @@ foreach ($emp in $Employees) {
             -PasswordNeverExpires $true `
             -Enabled $true `
             -Path "OU=Employees,$DomainDN"
-    } catch { Write-Host "Employee $($emp.Sam) already exists" }
+    } catch { Write-Host ("Employee " + $emp.Sam + " already exists") }
 }
 
 Write-Host "[5/6] Creating DNS A records..."
