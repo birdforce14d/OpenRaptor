@@ -20,9 +20,9 @@ You do **not** need to install anything.
 ## How to Access the Lab
 
 ### 1. Sign in to Azure Portal
-Go to [portal.azure.com](https://portal.azure.com) and sign in with your **Azure/Entra credentials** — provided by your instructor.
-
-> ℹ️ Your Azure login is separate from your lab (AD) credentials. Your instructor will provide your Azure username (typically your work or training account). The on-prem lab account `cirtstudent@norca.click` is used to log in to VMs via Bastion, not to the Azure Portal itself.
+Go to [portal.azure.com](https://portal.azure.com) and sign in with your provided credentials:
+- Username: `cirtstudent@norca.click` (e.g. cirtstudent@norca.click)
+- Password: _(provided by your instructor)_
 
 ### 2. Navigate to the Lab Environment
 1. In the Azure Portal search bar, type **Resource Groups**
@@ -32,10 +32,7 @@ Go to [portal.azure.com](https://portal.azure.com) and sign in with your **Azure
 ### 3. Connect to a VM via Bastion
 1. Click on a VM (e.g. `dc01` or `win-norca-sp01`)
 2. Click **Connect** → **Bastion**
-3. Enter your credentials:
-   - Username: `cirtstudent@norca.click`
-   - Password: `CirtApacStudent2026`
-   > ℹ️ Use the domain account format `cirtstudent@norca.click` for DC01 and SP01. For **Kali01** (SSH), use `cirtadmin` / `Norca@2024!` — Kali is not domain-joined.
+3. Enter the VM credentials provided by your instructor
 4. A browser-based desktop session opens — no VPN, no RDP client needed
 
 ### 4. Access Log Analytics
@@ -73,6 +70,59 @@ Each module has three modes — choose what suits your experience level:
 - 🟢 **Guided** — step-by-step with expected outputs
 - 🟡 **Hints** — objectives + nudges when stuck
 - 🔴 **Challenge** — objectives only, no help
+
+---
+
+## Lab Environment — Key Endpoints
+
+For reference during your investigation exercises:
+
+| System | Address | Purpose |
+|--------|---------|---------|
+| SharePoint | `http://sharepoint.norca.click` (port 80) | NORCA intranet — primary investigation target |
+| ShellSite | `http://10.10.3.10:8080` (port 8080) | Module 01 scenario artefact — attacker persistence mechanism |
+| DC01 | `10.10.1.10` | Domain controller — authentication, AD investigation |
+| Kali01 | `10.10.2.10` | Attack workstation — attack simulation |
+
+> ⚠️ **ShellSite is a scenario artefact.** It is an intentionally deployed webshell running as `NT AUTHORITY\SYSTEM`. Do not be alarmed by it — it's part of the lab. Your job in Module 01 is to *find* it as part of your investigation.
+
+---
+
+## Validating Your Lab Environment (Before You Start)
+
+Before beginning any module, confirm the lab is ready. Run these from the SharePoint server (`win-norca-sp01`) or from your analyst workstation.
+
+### Quick validation checklist
+
+```powershell
+# 1. SharePoint intranet is up
+Invoke-WebRequest -Uri "http://sharepoint.norca.click" -UseBasicParsing | Select StatusCode
+# Expected: 200 or 401
+
+# 2. Module 01 scenario endpoint is reachable (run from SP01)
+Test-NetConnection -ComputerName localhost -Port 8080
+# Expected: TcpTestSucceeded : True
+
+# 3. Functional test (run from SP01)
+curl.exe "http://localhost:8080/cmd.aspx?cmd=whoami"
+# Expected: nt authority\system
+```
+
+If all three pass — your lab is ready. If not, contact your instructor before proceeding.
+
+### Known errors and quick fixes
+
+These are the errors students most commonly see before lab setup is complete. **Do not attempt to fix these yourself** — contact your instructor and quote the error code.
+
+| What you see | What it means | Who fixes it |
+|---|---|---|
+| `curl: (7) Failed to connect to localhost port 8080` | ShellSite not yet deployed or site stopped | Instructor runs `sp01-webshell-setup.ps1` |
+| `TcpTestSucceeded : False` on port 8080 | Same as above — no listener on 8080 | Instructor |
+| **HTTP 500.19** — "cannot read configuration file" | `web.config` missing in site root | Instructor recreates `web.config` |
+| SharePoint returns 503 | SharePoint app pool stopped | Instructor restarts SP01 or app pools |
+| `Unable to connect to remote server` on port 80 | SharePoint down or IIS stopped | Instructor |
+
+> 💡 The most common setup issue is the Module 01 port 8080 endpoint. If `Test-NetConnection localhost -Port 8080` returns `False`, the lab is not ready. Tell your instructor.
 
 ---
 

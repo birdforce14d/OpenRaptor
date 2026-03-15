@@ -41,39 +41,21 @@ az account show --query "{SubscriptionId:id, TenantId:tenantId, Name:name}"
 
 ## ✅ Section 2 — Service Principal (Deployment Account)
 
-We use a dedicated service principal to deploy infrastructure **and** manage student accounts. This keeps your personal credentials out of the deployment pipeline.
-
-### Required Permissions
-
-The service principal needs:
-- **Contributor** on the subscription — for creating and managing Azure resources (VMs, VNets, Bastion, etc.)
-- **User Access Administrator** on the subscription — for assigning RBAC roles to student accounts
-- **Microsoft Graph `User.ReadWrite.All`** (Entra ID) — for creating student accounts
+We use a dedicated service principal to deploy. This keeps your personal credentials out of the deployment pipeline.
 
 ### Option A — CLI (Recommended, ~2 minutes)
 
-> **⚠️ PowerShell users:** All commands are single-line — copy and paste directly.
-
-```
+```bash
+# Set your subscription first
 az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
-```
 
+# Create the service principal with Contributor role
+az ad sp create-for-rbac \
+  --name "sp-cirtlab-deploy" \
+  --role "Contributor" \
+  --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>" \
+  --sdk-auth
 ```
-az ad sp create-for-rbac --name "sp-cirtlab-deploy" --role "Contributor" --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
-```
-
-After creating the SP, grant **User Access Administrator** on the subscription:
-
-```
-az role assignment create --assignee "<SP_CLIENT_ID>" --role "User Access Administrator" --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
-```
-
-Then grant **Entra ID permission** for student account creation:
-
-1. Azure Portal → **Entra ID** → **App registrations** → `sp-cirtlab-deploy`
-2. **API permissions** → **Add a permission** → **Microsoft Graph**
-3. Add **Application permission**: `User.ReadWrite.All`
-4. Click **Grant admin consent**
 
 Copy the entire JSON output — it looks like this:
 ```json
@@ -204,9 +186,6 @@ az security workspace-setting list --output table
 Once complete, please confirm:
 
 - [ ] Service principal created and credentials collected
-- [ ] SP has **Contributor** role on subscription
-- [ ] SP has **User Access Administrator** role on subscription
-- [ ] SP has **Microsoft Graph `User.ReadWrite.All`** permission (admin consent granted)
 - [ ] Subscription ID and Tenant ID noted
 - [ ] VM quota verified (10 vCPUs available in chosen region)
 - [ ] Existing infra documented (or "none — clean subscription")
@@ -215,75 +194,20 @@ Once complete, please confirm:
 
 ---
 
-## 📤 How to Send Us Your Details
-
-> **⚠️ Security Notice:** The information collected above contains sensitive credentials. **Never send these via email or unencrypted chat.**
-
-### How to Send Us Your Details
-
-> **⚠️ Security Notice:** The information collected above contains sensitive credentials. **Never send these via email or unencrypted chat.**
-
-📄 **Use the [Handover Sheet](handover-sheet.md)** — it has the full JSON template and step-by-step instructions.
-
-**Steps:**
-
-1. Download and complete the [Handover Sheet](handover-sheet.md)
-2. Save your values as `handover.json`
-3. Compress with **7-Zip using AES-256 encryption**:
-   - Right-click the file → **7-Zip** → **Add to archive**
-   - Set **Archive format:** `7z`
-   - Set **Encryption method:** `AES-256`
-   - Enter the **password provided to you by OD@CIRT.APAC** via a separate channel
-   - ☑️ **Encrypt file names**
-4. Send the `.7z` file to OD@CIRT.APAC via the email address provided
-
-### What to include:
-
-```json
-{
-  "subscriptionId": "<YOUR_SUBSCRIPTION_ID>",
-  "tenantId": "<YOUR_TENANT_ID>",
-  "servicePrincipal": {
-    "clientId": "<SP_CLIENT_ID>",
-    "clientSecret": "<SP_CLIENT_SECRET>"
-  },
-  "region": "<YOUR_REGION>",
-  "labConfig": {
-    "organisationName": "<YOUR_ORG_NAME>",
-    "domain": "<YOUR_DOMAIN>",
-    "adminContactEmail": "<YOUR_EMAIL>"
-  },
-  "existingInfra": {
-    "vnetsInUse": [],
-    "resourceGroupsToAvoid": [],
-    "policyRestrictions": ""
-  }
-}
-```
-
-### 📧 Contact
-
-Send the handover to: **OD@CIRT.APAC** via your agreed secure channel.
-
-If you don't have a contact yet, reach out at the email provided during onboarding.
-
----
-
 ## What Happens Next
 
 Once we receive your completed checklist:
 
-1. We deploy the full lab into your tenant (~1 hour)
-2. We create student accounts and configure access
-3. We run automated validation
-4. We send you a handover report with:
-   - Bastion access URL
-   - Student credentials
-   - [Student Lab Guide](lab-guide/01-sharepoint-webshell.md)
-   - [Admin Guide](admin-guide.md) (jump to Lab Administration section)
-   - Reset procedure for between students
+1. We deploy the full lab (~1 hour)
+2. We run automated validation
+3. We send you a handover report with:
+   - Live lab URL
+   - All credentials
+   - Student quickstart guide
+   - Instructor admin guide
+   - Reset procedure
 
-**Questions?** Contact OD@CIRT.APAC via your onboarding channel.
+**Questions?** Contact your CIRT team lead.
 
 ---
 
@@ -311,6 +235,7 @@ OD@CIRT.APAC publishes images to an Azure Community Gallery. The gallery name is
 | `dc01-base` | DC01 | AD DS + DNS, norca.click domain |
 | `sp01-module01-student` | SP01 | Clean SharePoint — noWS (Module 01 default) |
 | `sp01-module01` | SP01 | Pre-compromised SharePoint — webShelled (future modules) |
+| `kali01-base` | Kali01 | Kali with full attack toolkit |
 
 ### 8c — Confirm Image Access
 
@@ -325,6 +250,7 @@ az sig image-definition list-community \
 Expected output:
 ```
 dc01-base
+kali01-base
 sp01-module01
 sp01-module01-student
 ```
@@ -332,4 +258,61 @@ sp01-module01-student
 - [ ] Community gallery name noted
 - [ ] All 4 image definitions visible from your subscription
 - [ ] `image_location` matches gallery region
+
+---
+
+## ✅ Section 9 — Post-Deployment Validation Gates
+
+After deployment completes, run these checks before handing the lab to a student. **All gates must pass.**
+
+### Gate 1 — Core connectivity (run from DC01)
+
+```powershell
+# SP01 SharePoint responding
+Invoke-WebRequest -Uri "http://sharepoint.norca.click" -UseBasicParsing -TimeoutSec 10
+# Expected: StatusCode 200 or 401
+
+# DC01 DNS resolving SP01
+Resolve-DnsName "win-norca-sp01.norca.click"
+# Expected: returns 10.10.3.10
+```
+
+### Gate 2 — ShellSite (Module 01 scenario artefact)
+
+This is the mandatory gate before any Module 01 student handoff.
+
+Run on **SP01** (RDP, elevated PowerShell):
+
+```powershell
+# TCP listener check
+Test-NetConnection -ComputerName localhost -Port 8080
+# MUST return: TcpTestSucceeded : True
+
+# Functional webshell test
+curl.exe "http://localhost:8080/cmd.aspx?cmd=whoami"
+# MUST return: nt authority\system
+```
+
+> ❌ **If either check fails:** Run `sp01-webshell-setup.ps1` on SP01 directly (elevated PS, not via run-command). See the Admin Guide Troubleshooting section for the full failure matrix.
+
+### Gate 3 — Scenario accounts
+
+```powershell
+# On DC01
+Get-ADUser -Filter {SamAccountName -eq "j.chen"} | Select Name, Enabled
+# Expected: Enabled = True
+
+Get-ADUser -Filter {SamAccountName -eq "cirtstudent"} | Select Name, Enabled
+# Expected: Enabled = True
+```
+
+### Gate 4 — Run the full lab check script
+
+```powershell
+# On DC01, as Domain Admin
+.\scenarios\module-01-webshell\admin\lab_01_check.ps1
+# Expected: ALL CHECKS PASSED
+```
+
+Only proceed to student handoff when `lab_01_check.ps1` exits with all checks green.
 

