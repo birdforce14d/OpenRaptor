@@ -114,13 +114,13 @@ Check "Kali reachable" ((Test-NetConnection -ComputerName $KaliIP -Port 22 -Warn
 # Check attack scripts via SSH (best-effort)
 $toolsOk = $false
 try {
-    $result = ssh "kali@$KaliIP" "test -x /opt/raptor/module-01/attack.sh && test -x /opt/raptor/module-01/preflight.sh && echo OK" 2>$null
+    $result = ssh "kali@$KaliIP" "test -x /opt/raptor/module-01/attack.sh && test -x /opt/raptor/module-01/check-lab-01.sh && echo OK" 2>$null
     $toolsOk = ($result -eq "OK")
 } catch {}
 if ($toolsOk) {
     Check "Attack scripts deployed to Kali" $true
 } else {
-    Check "Attack scripts deployed to Kali" $false "Copy attack.sh + preflight.sh to /opt/raptor/module-01/ on Kali"
+    Check "Attack scripts deployed to Kali" $false "Copy attack.sh + check-lab-01.sh to /opt/raptor/module-01/ on Kali"
 }
 Write-Host ""
 

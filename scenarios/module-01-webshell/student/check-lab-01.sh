@@ -61,10 +61,10 @@ echo ""
 # --- 1. Network connectivity ---
 echo -e "${YELLOW}[1/7] Network Connectivity${NC}"
 
-ping -c 1 -W 3 "$DC01_IP" > /dev/null 2>&1
+nc -z -w3 "$DC01_IP" 389 > /dev/null 2>&1
 check "DC01 ($DC01_IP) is reachable" "Check Azure — is DC01 running?" $?
 
-ping -c 1 -W 3 "$SP01_IP" > /dev/null 2>&1
+nc -z -w3 "$SP01_IP" 80 > /dev/null 2>&1
 check "SP01 ($SP01_IP) is reachable" "Check Azure — is SP01 running?" $?
 echo ""
 

@@ -392,6 +392,8 @@ az role assignment create \
   --role "Log Analytics Reader" \
   --scope /subscriptions/<YOUR_SUBSCRIPTION_ID>/resourceGroups/rg-cirtlab-core
 
+> **Note (OD@CIRT.APAC deployments):** The  account is created automatically during DC01 provisioning. Skip this manual step if your lab was deployed by OD@CIRT.APAC.
+
 # PowerShell
 az role assignment create `
   --assignee "cirtstudent@norca.click" `

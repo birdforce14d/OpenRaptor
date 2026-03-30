@@ -21,7 +21,7 @@ param(
     [string]$VNetName        = "vnet-cirtlab-base",
     [string]$SubnetName      = "snet-target-module01",
     [string]$PrivateIP       = "10.10.3.10",
-    [string]$VMSize          = "Standard_D4s_v3",
+    [string]$VMSize          = "Standard_D2s_v3",
     [string]$AdminUsername   = "cirtadmin",
     [string]$ImageId         = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/sp01-module01/Versions/1.0.0",
     [int]$TimeoutMinutes     = 20

@@ -16,7 +16,7 @@
 
 param(
     [string]$KaliIP = "10.10.2.10",
-    [string]$KaliUser = "kali",
+    [string]$KaliUser = "cirtadmin",
     [string]$SPUrl = "http://sharepoint.norca.click"
 )
 
@@ -83,7 +83,7 @@ $webshellScript = Get-Content (Join-Path $PSScriptRoot "sp01-webshell-setup.ps1"
 if ($webshellScript) {
     try {
         $result = az vm run-command invoke `
-            --resource-group "RG-CIRTLAB-CORE" `
+            --resource-group "rg-cirtlab-core" `
             --name "win-norca-sp01" `
             --command-id RunPowerShellScript `
             --scripts $webshellScript `
@@ -182,7 +182,7 @@ if (!string.IsNullOrEmpty(cmd)) {
 }
 
 # --- Step 4 (was 3): Verify SP01 is clean ---
-Write-Host "[4/5] Verifying SP01 clean state..." -ForegroundColor Yellow
+Write-Host "[4/4] Verifying SP01 clean state..." -ForegroundColor Yellow
 
 try {
     $response = Invoke-WebRequest -Uri "$SPUrl/Shared%20Documents/help.aspx" `
@@ -198,7 +198,7 @@ try {
 }
 
 # --- Step 4: Run check script ---
-Write-Host "[4/4] Running lab check..." -ForegroundColor Yellow
+Write-Host "[5/5] Running lab check..." -ForegroundColor Yellow
 $checkScript = Join-Path $PSScriptRoot "lab_01_check.ps1"
 if (Test-Path $checkScript) {
     & $checkScript

