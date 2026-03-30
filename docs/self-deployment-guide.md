@@ -141,7 +141,7 @@ az network nic create --resource-group rg-cirtlab-core --name dc01-nic --vnet-na
 ```
 
 ```
-az vm create --resource-group rg-cirtlab-core --name dc01 --nics dc01-nic --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest --size Standard_D2s_v3 --admin-username cirtadmin --admin-password "Norca@2024!" --os-disk-size-gb 128 --no-wait
+az vm create --resource-group rg-cirtlab-core --name dc01 --nics dc01-nic --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest --size Standard_D2s_v3 --admin-username cirtadmin --admin-password "<YOUR_ADMIN_PASSWORD>" --os-disk-size-gb 128 --no-wait
 ```
 
 > ⏳ Wait for the VM to be running before continuing.
@@ -201,7 +201,7 @@ az network nic create --resource-group rg-cirtlab-core --name sp01-nic --vnet-na
 ```
 
 ```
-az vm create --resource-group rg-cirtlab-core --name sp01 --nics sp01-nic --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest --size Standard_D4s_v3 --admin-username cirtadmin --admin-password "Norca@2024!" --os-disk-size-gb 128 --no-wait
+az vm create --resource-group rg-cirtlab-core --name sp01 --nics sp01-nic --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest --size Standard_D4s_v3 --admin-username cirtadmin --admin-password "<YOUR_ADMIN_PASSWORD>" --os-disk-size-gb 128 --no-wait
 ```
 
 ### Configure DNS and Join Domain
@@ -271,7 +271,7 @@ az network nic create --resource-group rg-cirtlab-core --name kali01-nic --vnet-
 ```
 
 ```
-az vm create --resource-group rg-cirtlab-core --name kali01 --nics kali01-nic --image kali-linux:kali:kali-2025-4:latest --size Standard_D2s_v3 --admin-username cirtadmin --admin-password "Norca@2024!" --os-disk-size-gb 64 --plan-name kali-2025-4 --plan-product kali --plan-publisher kali-linux --no-wait
+az vm create --resource-group rg-cirtlab-core --name kali01 --nics kali01-nic --image kali-linux:kali:kali-2025-4:latest --size Standard_D2s_v3 --admin-username cirtadmin --admin-password "<YOUR_ADMIN_PASSWORD>" --os-disk-size-gb 64 --plan-name kali-2025-4 --plan-product kali --plan-publisher kali-linux --no-wait
 ```
 
 ### Install Attack Toolkit

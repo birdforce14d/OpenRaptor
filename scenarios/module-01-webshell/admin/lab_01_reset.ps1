@@ -23,7 +23,7 @@ param(
     [string]$PrivateIP       = "10.10.3.10",
     [string]$VMSize          = "Standard_D4s_v3",
     [string]$AdminUsername   = "cirtadmin",
-    [string]$ImageId         = "/CommunityGalleries/cirtraptorlab-732fa912-74d1-4049-831b-83781b188c49/Images/sp01-module01/Versions/1.0.0",
+    [string]$ImageId         = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/sp01-module01/Versions/1.0.0",
     [int]$TimeoutMinutes     = 20
 )
 
