@@ -21,7 +21,7 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 - Active Azure subscription with **Contributor** role (or Owner)
 - Entra ID tenant with ability to register applications
 - Sufficient quota in your target region:
-  - At least **4 vCPUs** (Standard_B2s or equivalent)
+  - At least **6 vCPUs** (Standard_D2s_v3 × 3 VMs)
   - **1 Bastion** deployment
   - **1 Public IP** (for Bastion only)
 
@@ -43,7 +43,12 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 
 > **Do not guess passwords. This table is the system of record. Updated: 2026-03-09**
 
+| Class | Account | Password | Notes |
 |-------|-----------|----------|-------|
+| Domain Admin | cirtadmin | CirtApac2024! | Local and domain admin on all VMs |
+| Student login | cirtstudent | CirtApac2024! | On-prem AD only — cannot log in to Azure Portal |
+| SharePoint SVC | svc-sp-farm | Norca@2024! | Baked into SP01 image — do not change |
+| SharePoint SVC | svc-sp-app | Norca@2024! | Baked into SP01 image — do not change |
 
 > ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`) must use `Norca@2024!` - this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
 
@@ -105,8 +110,6 @@ location        = "australiaeast"        # Change to your preferred region
 rg_network  = "rg-cirtlab-network"
 rg_core     = "rg-cirtlab-core"
 rg_attacker = "rg-cirtlab-attacker"
-rg_policy   = "rg-cirtlab-policy"
-rg_identity = "rg-cirtlab-identity"
 
 # VM admin credentials
 admin_username = "cirtadmin"
@@ -117,7 +120,6 @@ sp01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/sp01-module
 dc01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/dc01-base-specialized/Versions/1.0.0"
 
 # Kali post-deploy setup script (pull from OpenRaptor - public)
-kali_setup_script_url = "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh"
 
 # Infrastructure
 bastion_sku   = "Basic"
@@ -350,7 +352,7 @@ After all VMs are running, stage the scenario toolkit for Module 01. Run this fr
 ```powershell
 # On DC01 - stage Module 01 toolkit
 # Downloads from OpenRaptor, stages on Kali01, seeds j.chen account
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scripts/lab_01_setup.ps1" -OutFile "C:\lab_01_setup.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scenarios/module-01-webshell/admin/lab_01_setup.ps1" -OutFile "C:\lab_01_setup.ps1"
 .\lab_01_setup.ps1
 ```
 
@@ -416,7 +418,7 @@ Students connect via Azure Bastion - no public IPs, no VPN required:
 > Costs vary by region and usage. Bastion is the biggest cost driver - consider [Bastion Developer SKU](https://learn.microsoft.com/azure/bastion/quickstart-developer) to reduce costs.
 
 ### Auto-Shutdown
-All VMs are configured to shut down at `19:00 UTC` daily. Override in `terraform.tfvars`.
+Auto-shutdown is **not configured by default** in the Terraform deployment. To enable nightly shutdown at 19:00 UTC, run `az vm auto-shutdown --resource-group <RG> --name <VM> --time 1900` for each VM, or configure via Azure Portal → VM → Auto-shutdown.
 
 ### Destroy the Lab
 ```bash
@@ -706,7 +708,7 @@ Kali is deployed from **Azure Marketplace** (not Community Gallery - Marketplace
 az vm delete --resource-group <YOUR_RESOURCE_GROUP> --name kali01 --yes
 
 # Accept Marketplace terms (if not already done)
-az vm image terms accept --publisher kali-linux --offer kali-linux --plan kali
+az vm image terms accept --publisher kali-linux --offer kali --plan kali-2025-4
 
 # Redeploy from Marketplace
 az vm create \
@@ -714,10 +716,10 @@ az vm create \
   --name kali01 \
   --image "kali-linux:kali:kali-2025-4:latest" \
   --size Standard_D2s_v3 \
-  --admin-username azureuser \
+  --admin-username cirtadmin \
   --admin-password "<YOUR_ADMIN_PASSWORD>" \
-  --vnet-name vnet-cirtlab \
-  --subnet subnet-kali \
+  --vnet-name vnet-cirtlab-base \
+  --subnet snet-attacker \
   --public-ip-address "" \
   --location <YOUR_REGION>
 ```
@@ -772,4 +774,4 @@ For issues, open a GitHub issue at [<your-org>/OpenRaptor](https://github.com/<y
 
 ---
 
-_Last updated: 2026-03-09_
+_Last updated: 2026-03-30_

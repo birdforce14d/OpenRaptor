@@ -19,10 +19,14 @@ You do **not** need to install anything.
 
 ## How to Access the Lab
 
-### 1. Sign in to Azure Portal
-Go to [portal.azure.com](https://portal.azure.com) and sign in with your provided credentials:
-- Username: `cirtstudent@norca.click` (e.g. cirtstudent@norca.click)
-- Password: _(provided by your instructor)_
+### 1. Connect via Azure Bastion
+Your instructor will provide a direct Bastion link to each lab VM. Access is browser-based — no VPN or Azure Portal login required.
+
+> ⚠️ **Do not attempt to sign in to the Azure Portal with your lab credentials.** The `cirtstudent` account is an on-premises Active Directory account and cannot authenticate to Azure AD / Entra ID.
+
+Connect to each VM using:
+- **Username:** `NORCA\\cirtstudent` (or just `cirtstudent` in the Bastion username field)
+- **Password:** provided by your instructor
 
 ### 2. Navigate to the Lab Environment
 1. In the Azure Portal search bar, type **Resource Groups**
