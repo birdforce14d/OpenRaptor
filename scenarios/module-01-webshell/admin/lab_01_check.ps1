@@ -34,15 +34,15 @@ Write-Host "===========================" -ForegroundColor Yellow
 Write-Host ""
 
 # --- 1. DC01 ---
-Write-Host "[1/5] Domain Controller (DC01)" -ForegroundColor Yellow
-Check "DC01 reachable" (Test-Connection $DCIP -Count 1 -Quiet)
+Write-Host "[1/6] Domain Controller (DC01)" -ForegroundColor Yellow
+Check "DC01 reachable" ((Test-NetConnection -ComputerName $DCIP -Port 389 -WarningAction SilentlyContinue).TcpTestSucceeded) "DC01 LDAP port 389 not reachable"
 Check "AD DS service running" ((Get-Service NTDS -ErrorAction SilentlyContinue).Status -eq 'Running') "AD DS not running"
 Check "DNS service running" ((Get-Service DNS -ErrorAction SilentlyContinue).Status -eq 'Running') "DNS not running"
 Write-Host ""
 
 # --- 2. SP01 ---
-Write-Host "[2/5] SharePoint Server (SP01)" -ForegroundColor Yellow
-Check "SP01 reachable" (Test-Connection $SPIP -Count 1 -Quiet)
+Write-Host "[2/6] SharePoint Server (SP01)" -ForegroundColor Yellow
+Check "SP01 reachable" ((Test-NetConnection -ComputerName $SPIP -Port 80 -WarningAction SilentlyContinue).TcpTestSucceeded) "SP01 port 80 not reachable"
 
 $iisOk = $false
 try {
@@ -73,7 +73,7 @@ if ($shellOk) { Write-Host "         -> cmd.aspx running as: $shellOutput" -Fore
 Write-Host ""
 
 # --- 3. AD Accounts ---
-Write-Host "[3/5] Scenario Accounts" -ForegroundColor Yellow
+Write-Host "[3/6] Scenario Accounts" -ForegroundColor Yellow
 $jchen = Get-ADUser -Filter {SamAccountName -eq "j.chen"} -ErrorAction SilentlyContinue
 Check "j.chen account exists" ($null -ne $jchen) "Run lab_01_setup.ps1 to create"
 
@@ -83,10 +83,10 @@ if ($jchen) {
 Write-Host ""
 
 # --- 4. Clean state ---
-Write-Host "[4/5] Clean State" -ForegroundColor Yellow
+Write-Host "[4/6] Clean State" -ForegroundColor Yellow
 $shellExists = $false
 try {
-    $password = ConvertTo-SecureString "<YOUR_STUDENT_PASSWORD>" -AsPlainText -Force
+    $password = ConvertTo-SecureString "CirtApacStudent2026" -AsPlainText -Force
     $cred = New-Object PSCredential("NORCA\j.chen", $password)
     $r = Invoke-WebRequest -Uri "$SPUrl/Shared%20Documents/help.aspx" -Credential $cred -UseBasicParsing -ErrorAction Stop
     $shellExists = $true
@@ -109,7 +109,7 @@ Write-Host ""
 
 # --- 6. Kali ---
 Write-Host "[6/6] Kali Attack Machine" -ForegroundColor Yellow
-Check "Kali reachable" (Test-Connection $KaliIP -Count 1 -Quiet)
+Check "Kali reachable" ((Test-NetConnection -ComputerName $KaliIP -Port 22 -WarningAction SilentlyContinue).TcpTestSucceeded) "Kali SSH port 22 not reachable"
 
 # Check attack scripts via SSH (best-effort)
 $toolsOk = $false

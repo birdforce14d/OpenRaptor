@@ -73,7 +73,7 @@ SSH into the Kali attack machine via Azure Bastion:
 Before starting the attack, verify the lab environment is ready:
 
 ```bash
-cd /opt/raptor/module-01
+cd /opt/raptor/lab-01
 ./check-lab-01.sh
 ```
 
@@ -92,7 +92,7 @@ The attack script uploads a webshell to SharePoint and simulates attacker activi
 
 ```bash
 # Run the webshell attack simulation
-cd /opt/raptor/module-01
+cd /opt/raptor/lab-01
 ./attack.sh
 ```
 

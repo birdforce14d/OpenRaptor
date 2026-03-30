@@ -43,14 +43,7 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 
 > **Do not guess passwords. This table is the system of record. Updated: 2026-03-09**
 
-| Class | Account(s) | Password | Notes |
 |-------|-----------|----------|-------|
-| Domain Admin | `NORCA\cirtadmin`, `NORCA\Administrator` | `CirtApacAdm!n2026` | Do not share with students |
-| Student login | `NORCA\cirtstudent`, `cirtstudent@norca.click` | `CirtApacStudent2026` | Lab login for students |
-| Scenario character | `NORCA\j.chen` | `CirtApacStudent2026` | Finance Analyst - compromised in scenario |
-| **Service account** | `NORCA\svc-sp-farm` | **`Norca@2024!`** | **Baked in golden image - do not rotate** |
-| **Service account** | `NORCA\svc-sp-app` | **`Norca@2024!`** | **Baked in golden image - do not rotate** |
-| Handover encryption | _(7-Zip archive)_ | `CirtAPACR@ptor` | Standard handover zip password |
 
 > ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`) must use `Norca@2024!` - this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
 
@@ -127,7 +120,7 @@ dc01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/dc01-base-s
 kali_setup_script_url = "https://raw.githubusercontent.com/<your-org>/OpenRaptor/main/scenarios/module-01-webshell/admin/kali_01_setup.sh"
 
 # Infrastructure
-bastion_sku   = "Standard"
+bastion_sku   = "Basic"
 dns_zone_name = "norca.click"
 vm_size       = "Standard_D2s_v3"
 
@@ -200,34 +193,19 @@ terraform init
 # Preview - review carefully before applying
 terraform plan -out=tfplan
 
-# Apply - takes approximately 10-20 minutes
+# Apply - takes approximately 45-55 minutes (includes DC01 AD provisioning, 15-min wait, SP01 domain join and postsetup)
 terraform apply tfplan
 ```
 
 Resources created:
 
-| Module | Resources |
 |--------|-----------|
-| `network` | VNet `10.10.0.0/16`, 4 subnets, 4 NSGs |
-| `bastion` | Azure Bastion Standard + Public IP |
-| `logging` | Log Analytics Workspace (`law-cirtlab`) |
-| `dns` | Private DNS zone `norca.click`, A records for DC01 + SP01 |
-| `dc01` | DC01 VM from Community Gallery (`dc01-base-specialized`) at `10.10.1.10` |
-| `sp01` | SP01 VM from Community Gallery (`sp01-module01-student`) at `10.10.3.10` |
-| `kali01` | Kali Linux VM from Azure Marketplace at `10.10.2.10` |
-| `policy` | Tag policy (audit mode) |
-| `scripts-storage` | Storage account for lab scripts |
 
 > ⏳ VM provisioning from golden images takes **5-10 minutes** per VM. Total deployment: **15-25 minutes**.
 
 ### Golden Images
 
-| Image | VM | Source | Description |
 |-------|-----|--------|-------------|
-| `dc01-base-specialized` | DC01 | Community Gallery | Windows Server - AD DS, DNS, `norca.click` domain pre-configured |
-| `sp01-module01-student` | SP01 | Community Gallery | SharePoint 2019 - **clean (noWS)**. Use for Module 01 student path |
-| `sp01-module01` | SP01 | Community Gallery | SharePoint 2019 - **webShelled**. Reserved for future walk-in-compromised scenarios |
-| _(Marketplace)_ | Kali01 | Azure Marketplace `kali-linux:kali:kali-2025-4` | Kali Linux - Marketplace terms prevent Community Gallery distribution |
 
 > 📌 Community Gallery name (`<COMMUNITY_GALLERY_NAME>`) is provided by OD@CIRT.APAC directly to authorised deployers. It is not published in this repo.
 
@@ -433,14 +411,7 @@ Students connect via Azure Bastion - no public IPs, no VPN required:
 
 ### Estimated Monthly Cost (australiaeast, all VMs running 8h/day)
 
-| Resource | Est. Cost/month |
 |---|---|
-| DC01 (Standard_B2s) | ~$30 |
-| SP01 (Standard_B4ms) | ~$60 |
-| Kali01 (Standard_B2s) | ~$30 |
-| Azure Bastion (Basic) | ~$140 |
-| Log Analytics (5GB/day) | ~$15 |
-| **Total** | **~$275/month** |
 
 > Costs vary by region and usage. Bastion is the biggest cost driver - consider [Bastion Developer SKU](https://learn.microsoft.com/azure/bastion/quickstart-developer) to reduce costs.
 
@@ -515,15 +486,7 @@ curl.exe "http://localhost:8080/cmd.aspx?cmd=whoami"
 
 #### Step 2 — Symptom → Cause → Fix
 
-| Symptom | Cause | Fix |
 |---------|-------|-----|
-| `curl: (7) Failed to connect` / `TcpTestSucceeded: False` | ShellSite not in IIS config, or site/pool stopped | Run `sp01-webshell-setup.ps1` (see below) |
-| `netstat` shows `:8080 LISTENING` but `TcpTestSucceeded: False` | HTTP.sys registered but no w3wp spawned; pool crash loop | `appcmd start apppool ShellPool` then `iisreset` |
-| **HTTP 500.19 — `0x80070003`** | `C:\inetpub\shell\web.config` missing or unreadable | Recreate `web.config` (see below) |
-| HTTP 500.19 — `0x8007000d` | `web.config` XML is malformed | Recreate `web.config` with correct content |
-| HTTP 403 / 401 | ACL on `C:\inetpub\shell\` blocks IIS identity | `icacls C:\inetpub\shell /grant "IIS_IUSRS:(OI)(CI)(RX)" /T` |
-| HTTP 200 but blank output | `cmd.aspx` is empty or truncated | Redeploy `cmd.aspx` (see below) |
-| ShellSite visible in appcmd but not `Get-WebSite` | PowerShell WebAdministration read wrong (SysWOW64) config | Use `appcmd.exe` only — see WOW64 note below |
 
 #### Fix A — Full rebuild (recommended, idempotent)
 
@@ -589,12 +552,7 @@ Every module ships **three admin scripts** (run from DC01) and **one student scr
 
 ### Script Model
 
-| Script | Who | Where | Purpose |
 |--------|-----|--------|---------|
-| `admin/lab_NN_setup.ps1` | Admin | DC01 | First-time setup: create AD accounts, stage toolkit on Kali |
-| `admin/lab_NN_check.ps1` | Admin | DC01 | Pre-flight: verify lab is ready before handing to student |
-| `admin/lab_NN_reset.ps1` | Admin | DC01 | Reset: rebuild VM(s) from golden image between students |
-| `student/check-lab-NN.sh` | Student | Kali01 | Student preflight: confirm environment is ready before starting |
 
 > ⚠️ **All admin scripts run from DC01 as Domain Admin.** Never run reset scripts from the management workstation.
 
@@ -639,10 +597,7 @@ All checks must pass (exit 0) before student proceeds.
 
 ### Golden Image Reference - SP01
 
-| Image | Use case |
 |-------|----------|
-| `sp01-module01-student` | **noWS - Module 01 default.** Student drops webshell themselves from Kali. |
-| `sp01-module01` | **webShelled - future modules.** Investigation starts from already-compromised state. |
 
 > The reset script for Module 01 always rebuilds from `sp01-module01-student`. Never substitute the webShelled image for the student path.
 
@@ -677,12 +632,7 @@ Use this plan if a VM crashes and cannot be recovered by a normal restart.
 
 ### Recovery Priority
 
-| VM | Rebuild Trigger | Impact if Down |
 |---|---|---|
-| SP01 | Student reset OR unrecoverable crash | Scenario unavailable - rebuild is normal ops |
-| DC01 | Only if unrecoverable (AD corruption, OS failure) | All VMs lose domain auth - lab fully down |
-| Kali | Only if unrecoverable | Attack simulation unavailable only |
-| Base infra | Extreme case only | Full lab destruction |
 
 ---
 
