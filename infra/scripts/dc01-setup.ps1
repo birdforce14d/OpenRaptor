@@ -1,4 +1,12 @@
 # =============================================================================
+# LEGACY NOTICE: This script is NOT used in the current OD@CIRT.APAC deployment.
+# Current deployment uses the dc01-base-specialized golden image (ARM template
+# + managed identity + dc01-presetup.ps1 via Custom Script Extension).
+# This script documents the self-hosted path for admins deploying without
+# the golden image. See docs/self-deployment-guide.md for context.
+# =============================================================================
+
+# =============================================================================
 # Module-01: DC01 Setup Script (Part 1)
 # Downloaded and run by CustomScriptExtension at VM provisioning time
 # Step 1: Rename, AD DS install, forest promotion

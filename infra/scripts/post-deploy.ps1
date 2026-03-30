@@ -3,9 +3,9 @@
 # Stage 1: Wait for DC01 reachability, domain rejoin (with retry), schedule Stage 2
 # Stage 2: Grant logon rights, reset app pool identity, start SP services
 
-$LogFile    = "C:\Windows\Temp\post-deploy.log"
-$Stage2Flag = "C:\Windows\Temp\post-deploy-stage2.flag"
-$ScriptPath = "C:\Windows\Temp\post-deploy.ps1"
+$LogFile    = "C:\ProgramData\CIRT\post-deploy.log"
+$Stage2Flag = "C:\ProgramData\CIRT\post-deploy-stage2.flag"
+$ScriptPath = "C:\ProgramData\CIRT\post-deploy.ps1"
 
 function Write-Log {
     param($msg)
@@ -13,7 +13,8 @@ function Write-Log {
     "$ts  $msg" | Tee-Object -FilePath $LogFile -Append
 }
 
-$AdminUser     = "NORCA\cirtadmin"
+$AdminUser     = "NORCA\cirtadmin"  # Used for SQL bootstrap only
+    = "NORCA\svc-sp-farm"  # SP service account — app pool identity
 $AdminPassword = "CirtApacAdm!n2026"
 $Domain        = "norca.click"
 $DcIP          = "10.10.1.10"
@@ -156,8 +157,8 @@ GO
     Write-Log "Resetting app pool identity to $AdminUser..."
     Import-Module WebAdministration
     Set-WebConfigurationProperty -Filter "/system.applicationHost/applicationPools/add[@name='$AppPoolName']/processModel" -Name identityType   -Value 3
-    Set-WebConfigurationProperty -Filter "/system.applicationHost/applicationPools/add[@name='$AppPoolName']/processModel" -Name userName       -Value $AdminUser
-    Set-WebConfigurationProperty -Filter "/system.applicationHost/applicationPools/add[@name='$AppPoolName']/processModel" -Name password       -Value $AdminPassword
+    Set-WebConfigurationProperty -Filter "/system.applicationHost/applicationPools/add[@name='$AppPoolName']/processModel" -Name userName       -Value $SpFarmUser
+    Set-WebConfigurationProperty -Filter "/system.applicationHost/applicationPools/add[@name='$AppPoolName']/processModel" -Name password       -Value "Norca@2024!"  # svc-sp-farm password (baked in golden image)
     Set-WebConfigurationProperty -Filter "/system.applicationHost/applicationPools/add[@name='$AppPoolName']/processModel" -Name loadUserProfile -Value $true
     Set-WebConfigurationProperty -Filter "/system.applicationHost/applicationPools/add[@name='$AppPoolName']/failure"      -Name rapidFailProtection -Value $false
     try {

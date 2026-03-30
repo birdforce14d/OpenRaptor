@@ -49,13 +49,13 @@ echo ""
 
 
 # Pre-check: Verify WebDAV is accessible
-echo -e "[0/4] Pre-flight: checking WebDAV accessibility..."
+echo -e "${YELLOW}[0/4] Pre-flight: checking WebDAV accessibility...${NC}"
 WEBDAV_CHECK="000""000"
 if [[ "" != "2"* && "" != "401" && "" != "403" ]]; then
-  echo -e "[FAIL] WebDAV not accessible (HTTP ). Check SP01 IIS WebDAV."
+  echo -e "${RED}[FAIL] WebDAV not accessible (HTTP ${WEBDAV_CHECK}). Check SP01 IIS WebDAV.${NC}"
   exit 1
 fi
-echo -e "  [OK] WebDAV accessible"
+echo -e "${GREEN}  [OK] WebDAV accessible (HTTP ${WEBDAV_CHECK})${NC}"
 
 # Step 1: Upload webshell via WebDAV
 echo -e "${YELLOW}[1/4] Uploading webshell via WebDAV...${NC}"

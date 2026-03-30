@@ -2,6 +2,8 @@
 # Module-01: DC01 Post-Reboot Script (Part 2)
 # Runs automatically via RunOnce after AD DS promotion reboot
 # Creates: OUs, service accounts, employee accounts, DNS records, GPO
+# Note: All accounts use Norca@2024! as the standard lab password.
+# Employee background accounts intentionally share this password for lab simplicity.
 # =============================================================================
 
 #Requires -RunAsAdministrator
