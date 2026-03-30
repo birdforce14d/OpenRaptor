@@ -114,7 +114,7 @@ Check "Kali reachable" ((Test-NetConnection -ComputerName $KaliIP -Port 22 -Warn
 # Check attack scripts via SSH (best-effort)
 $toolsOk = $false
 try {
-    $result = ssh "kali@$KaliIP" "test -x /opt/raptor/module-01/attack.sh && test -x /opt/raptor/module-01/check-lab-01.sh && echo OK" 2>$null
+    $result = ssh "cirtadmin@$KaliIP" "test -x /opt/raptor/module-01/attack.sh && test -x /opt/raptor/module-01/check-lab-01.sh && echo OK" 2>$null
     $toolsOk = ($result -eq "OK")
 } catch {}
 if ($toolsOk) {
