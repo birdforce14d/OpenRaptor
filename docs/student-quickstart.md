@@ -11,7 +11,7 @@ This is a hands-on threat hunting and incident response training environment. Yo
 You will need:
 - ✅ Your lab credentials (provided by your admin)
 - ✅ A modern web browser (Chrome or Edge recommended)
-- ✅ Access to the [Azure Portal](https://portal.azure.com)
+- ✅ Access to Azure Bastion links (provided by your instructor)
 
 You do **not** need to install anything.
 

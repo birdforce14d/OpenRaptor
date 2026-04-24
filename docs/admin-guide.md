@@ -43,12 +43,14 @@ This guide is for administrators deploying the OpenRaptor Cyber Range in a new A
 
 > **Do not guess passwords. This table is the system of record. Updated: 2026-03-09**
 
-| Class | Account | Password | Notes |
-|-------|-----------|----------|-------|
-| Domain Admin | cirtadmin | CirtApac2024! | Local and domain admin on all VMs |
-| Student login | cirtstudent | CirtApac2024! | On-prem AD only — cannot log in to Azure Portal |
-| SharePoint SVC | svc-sp-farm | Norca@2024! | Baked into SP01 image — do not change |
-| SharePoint SVC | svc-sp-app | Norca@2024! | Baked into SP01 image — do not change |
+| Role | Account(s) | Password | Notes |
+|------|------------|----------|-------|
+| Domain Admin | NORCA\cirtadmin, NORCA\Administrator | CirtApacAdm!n2026 | Do not share with students |
+| Student login | NORCA\cirtstudent, cirtstudent@norca.click | CirtApacStudent2026 | Lab login for students |
+| Scenario character | NORCA\j.chen | CirtApacStudent2026 | Finance Analyst - compromised in scenario |
+| Service account | NORCA\svc-sp-farm | Norca@2024! | Baked in golden image - do not rotate |
+| Service account | NORCA\svc-sp-app | Norca@2024! | Baked in golden image - do not rotate |
+| Handover encryption | (7-Zip archive) | CirtAPACR@ptor | Standard handover zip password |
 
 > ⚠️ Service accounts (`svc-sp-farm`, `svc-sp-app`) must use `Norca@2024!` - this is baked into the SP01 golden image. Using any other password will cause SharePoint services to fail on startup.
 
@@ -119,7 +121,6 @@ admin_username = "cirtadmin"
 sp01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/sp01-module01-student/Versions/1.0.0"
 dc01_image_id = "/CommunityGalleries/<COMMUNITY_GALLERY_NAME>/Images/dc01-base-specialized/Versions/1.0.0"
 
-# Kali post-deploy setup script (pull from OpenRaptor - public)
 
 # Infrastructure
 bastion_sku   = "Basic"
@@ -382,6 +383,8 @@ New-ADUser -Name "cirtstudent" `
   -PasswordNeverExpires $true `
   -Enabled $true
 ```
+
+> **Note:** If your lab was deployed by OD@CIRT.APAC, the `cirtstudent` account is created automatically during DC01 provisioning. Skip this step.
 
 ### Assign Log Analytics Reader Role
 
